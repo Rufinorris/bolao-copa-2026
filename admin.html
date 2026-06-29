@@ -57,6 +57,20 @@
     }
     .toggle-pag.pago { background: rgba(0,200,83,0.15); color: var(--success); }
     .toggle-pag.pendente { background: rgba(255,171,64,0.15); color: var(--warning); }
+    .tag-papel {
+      font-size: 10px; font-weight: 800; padding: 1px 7px; border-radius: 10px;
+      text-transform: uppercase; letter-spacing: 0.5px; vertical-align: middle;
+    }
+    .tag-papel.dono { background: rgba(124,107,255,0.18); color: var(--accent); }
+    .tag-papel.coadmin { background: rgba(255,215,0,0.16); color: var(--gold); }
+    .btn-coadmin {
+      background: none; border: 1px solid var(--border); border-radius: 10px;
+      width: 34px; height: 34px; flex-shrink: 0; cursor: pointer;
+      font-size: 16px; color: var(--text2); font-family: var(--font);
+      transition: all 0.15s;
+    }
+    .btn-coadmin.on { color: var(--gold); border-color: rgba(255,215,0,0.4); background: rgba(255,215,0,0.1); }
+    .btn-coadmin:active { transform: scale(0.92); }
 
     .jogo-admin-card {
       background: var(--bg2); border: 1px solid var(--border);
@@ -306,18 +320,39 @@
     let participantes = [];
     let jogos = [];
     let todosPalpitesAdmin = [];
+    let ehDono = true;
     const FASES_ORDER = ['round32','oitavas','quartas','semi','final'];
     let faseAtiva = 'round32';
 
     document.getElementById('back-btn').onclick = () => location.href = `bolao.html?id=${bolaoId}`;
+
+    // Co-admin só enxerga a aba de Resultados (placar + goleador)
+    function aplicarModoCoadmin() {
+      document.querySelectorAll('.tabs .tab').forEach(t => {
+        const oc = t.getAttribute('onclick') || '';
+        if (!oc.includes("'resultados'")) t.style.display = 'none';
+      });
+      mudarAba('resultados', document.querySelector(".tabs .tab[onclick*=\"'resultados'\"]"));
+      const titulo = document.querySelector('.header span');
+      if (titulo) titulo.textContent = '⚽ Resultados';
+    }
 
     async function init() {
       const user = await getUser();
       if (!user) { location.href = 'index.html'; return; }
 
       const { data } = await db.from('boloes').select('*').eq('id', bolaoId).single();
-      if (!data || data.admin_id !== user.id) { location.href = 'index.html'; return; }
+      if (!data) { location.href = 'index.html'; return; }
       bolao = data;
+
+      // Acesso: dono do bolão OU co-admin (este só edita resultados)
+      ehDono = data.admin_id === user.id;
+      if (!ehDono) {
+        const { data: meuPart } = await db.from('participantes')
+          .select('is_coadmin').eq('bolao_id', bolaoId).eq('user_id', user.id).single();
+        if (!meuPart?.is_coadmin) { location.href = 'index.html'; return; }
+        aplicarModoCoadmin();
+      }
 
       document.getElementById('link-bolao').textContent =
         `${location.origin}${location.pathname.replace('admin.html','bolao.html')}?id=${bolaoId}`;
@@ -360,18 +395,26 @@
       const pendentes = participantes.filter(p => !p.pagamento_confirmado);
       const pagos = participantes.filter(p => p.pagamento_confirmado);
 
-      const htmlPart = (p) => `
+      const htmlPart = (p) => {
+        const ehAdminDono = p.user_id === bolao.admin_id;
+        const podePromover = ehDono && !ehAdminDono;
+        const tag = ehAdminDono
+          ? ' <span class="tag-papel dono">dono</span>'
+          : p.is_coadmin ? ' <span class="tag-papel coadmin">co-admin</span>' : '';
+        return `
         <div class="part-row">
           <div class="part-avatar">${iniciais(p.nome)}</div>
           <div class="part-info">
-            <div class="part-nome">${p.nome}</div>
+            <div class="part-nome">${p.nome}${tag}</div>
             <div class="part-email">${formatData(p.created_at)}</div>
           </div>
+          ${podePromover ? `<button class="btn-coadmin ${p.is_coadmin ? 'on' : ''}" onclick="toggleCoadmin('${p.id}', ${!!p.is_coadmin})" title="${p.is_coadmin ? 'Remover co-admin' : 'Tornar co-admin'}">${p.is_coadmin ? '★' : '☆'}</button>` : ''}
           <button class="toggle-pag ${p.pagamento_confirmado ? 'pago' : 'pendente'}"
             onclick="togglePagamento('${p.id}', ${p.pagamento_confirmado})">
             ${p.pagamento_confirmado ? '✓ Pago' : '⏳ Pendente'}
           </button>
         </div>`;
+      };
 
       document.getElementById('lista-pendentes').innerHTML = pendentes.length
         ? pendentes.map(htmlPart).join('')
@@ -443,6 +486,16 @@
         await carregarParticipantes();
         showToast(novo ? 'Pagamento confirmado ✓' : 'Pagamento removido', novo ? 'success' : '');
       }
+    }
+
+    async function toggleCoadmin(partId, atual) {
+      const novo = !atual;
+      const p = participantes.find(x => x.id === partId);
+      if (novo && !confirm(`Tornar ${p?.nome || 'este participante'} co-admin?\n\nEle poderá atualizar placares e goleadores, mas NÃO mexe em pontuação, bloqueio ou liberação de palpites.`)) return;
+      const { error } = await db.from('participantes').update({ is_coadmin: novo }).eq('id', partId);
+      if (error) { showToast('Erro: ' + error.message, ''); return; }
+      await carregarParticipantes();
+      showToast(novo ? 'Co-admin promovido ★' : 'Co-admin removido', novo ? 'success' : '');
     }
 
     function renderFasesTabs() {

@@ -421,7 +421,7 @@
       document.getElementById('bolao-nome').textContent = bolao.nome;
       document.getElementById('header-nome').textContent = bolao.nome;
       if (bolao.admin_id === currentUser.id) {
-        document.getElementById('admin-btn').style.display = 'block';
+        document.getElementById('admin-btn').style.display = 'flex';
       }
     }
 
@@ -439,6 +439,10 @@
         participante = novo;
       } else {
         participante = data;
+      }
+
+      if (participante?.is_coadmin) {
+        document.getElementById('admin-btn').style.display = 'flex';
       }
 
       if (!participante.pagamento_confirmado && bolao.admin_id !== currentUser.id && bolao.chave_pix) {
