@@ -181,48 +181,9 @@ function getFoto(nome) {
   return null;
 }
 
-// Busca assíncrona via Wikipedia.
-// Tenta NOMES_COMPLETOS primeiro para evitar páginas homônimas erradas
-// (ex: "RÜDIGER" → artigo sobre o nome, não o jogador).
+// Desabilitado: busca Wikipedia causava imagens erradas (páginas homônimas)
+// e rate-limiting para usuários. Players sem foto mostram iniciais.
 async function _fetchWikiThumbnail(nome) {
-  function toTitleCase(s) {
-    return s.split(' ').map(w => {
-      if (/^[A-ZÁÉÍÓÚÃÕÂÊÔÀÜ]\.?$/.test(w)) return w; // iniciais sem alteração
-      if (w === 'JR.' || w === 'SR.' || w === 'JR' || w === 'SR') return w;
-      return w.charAt(0).toUpperCase() + w.slice(1).toLowerCase();
-    }).join(' ');
-  }
-
-  const tentativas = [];
-
-  // 1ª tentativa: nome completo de NOMES_COMPLETOS ("Antonio Rüdiger", "Leon Goretzka"…)
-  const nc = typeof NOMES_COMPLETOS !== 'undefined' ? NOMES_COMPLETOS[nome] : null;
-  if (nc) {
-    const parts = nc.split(' ');
-    const skip = new Set(['DA','DE','DO','DAS','DOS','DI','DEL','VAN','VON','D']);
-    const idx = parts.findIndex((w, i) => i > 0 && w.length > 1 && w === w.toUpperCase() && !skip.has(w));
-    if (idx > 0) {
-      const first = parts[0];
-      const last  = parts[idx].charAt(0).toUpperCase() + parts[idx].slice(1).toLowerCase();
-      tentativas.push(`${first} ${last}`);
-    }
-  }
-
-  // 2ª tentativa: title-case do nome de camisa ("Rüdiger", "Goretzka"…)
-  const tc = toTitleCase(nome);
-  if (!tentativas.includes(tc)) tentativas.push(tc);
-
-  for (const q of tentativas) {
-    try {
-      const r = await fetch(
-        `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(q)}`,
-        { signal: AbortSignal.timeout(3000) }
-      );
-      if (!r.ok) continue;
-      const d = await r.json();
-      if (d.thumbnail?.source && d.type === 'standard') return d.thumbnail.source;
-    } catch {}
-  }
   return null;
 }
 
