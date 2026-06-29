@@ -636,8 +636,7 @@
           }
         }
 
-        const { error: pErr } = await db.from('palpites')
-          .update({ pontos: total, calculado: true }).eq('id', pal.id);
+        const { error: pErr } = await db.rpc('atualizar_pontos_palpite', { p_id: pal.id, p_pontos: total });
         if (pErr) console.error('[ranking] erro ao atualizar palpite', pal.id, pErr);
       }
 
