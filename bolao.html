@@ -278,7 +278,7 @@
 <body>
   <div class="header">
     <button class="header-back" onclick="location.href='index.html'">‹</button>
-    <span id="header-nome" style="font-weight:700;font-size:16px">Bolão</span>
+    <span id="header-nome" style="font-weight:700;font-size:16px"></span>
     <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="btn btn-secondary btn-sm">⚙️ Admin</button>
   </div>
 
@@ -916,6 +916,7 @@
     }
 
     function renderTrashBanner() {
+      return; // trash talk aparece no ranking, banner removido
       const banner = document.getElementById('trash-banner');
       if (!banner || !jogos.length || !todosPalpites.length || !todosParticipantes.length) return;
 
@@ -1227,13 +1228,30 @@
       const s = simulacao[jogoId] || {};
       const hNome = s.home || jogo.time_home;
       const aNome = s.away || jogo.time_away;
+      const arts = Array.isArray(jogo.artilheiro_confirmado) ? jogo.artilheiro_confirmado.map(a => a.toLowerCase().trim()) : [];
+      const mostrarArt = bolao?.bonus_artilheiro_ativo;
       document.getElementById('modal-titulo').textContent = `${hNome} × ${aNome}`;
       document.getElementById('modal-content').innerHTML = pals.length
-        ? pals.map(p => `
-          <div class="outros-palpite-row">
-            <span class="outros-nome">${p.participantes?.nome || '—'}</span>
-            <span class="outros-placar">${p.placar_home} × ${p.placar_away}</span>
-          </div>`).join('')
+        ? pals.map(p => {
+            const acerto = jogo.placar_home != null
+              ? labelAcerto(p.placar_home, p.placar_away, jogo.placar_home, jogo.placar_away)
+              : null;
+            const artAcertou = p.artilheiro && arts.length && arts.includes(p.artilheiro.toLowerCase().trim());
+            const artHtml = mostrarArt && p.artilheiro
+              ? `<span style="font-size:11px;color:${artAcertou ? 'var(--gold)' : 'var(--text3)'};margin-top:2px">⚽ ${p.artilheiro}${artAcertou ? ' ✓' : ''}</span>`
+              : '';
+            return `
+              <div class="outros-palpite-row" style="flex-direction:column;align-items:flex-start;gap:2px;padding:10px 0">
+                <div style="display:flex;justify-content:space-between;width:100%;align-items:center">
+                  <span class="outros-nome">${p.participantes?.nome || '—'}</span>
+                  <div style="display:flex;align-items:center;gap:6px">
+                    <span class="outros-placar">${p.placar_home} × ${p.placar_away}</span>
+                    ${acerto ? `<span style="font-size:13px">${acerto.icon}</span>` : ''}
+                  </div>
+                </div>
+                ${artHtml}
+              </div>`;
+          }).join('')
         : '<p style="color:var(--text2);font-size:14px;text-align:center;padding:20px">Nenhum palpite ainda</p>';
       document.getElementById('modal-outros').classList.add('open');
     }
