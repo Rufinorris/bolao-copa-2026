@@ -162,7 +162,7 @@ const entries = [];
 for (const [camisa] of allPlayers) {
   const fn = safeFilename(camisa);
   if (downloaded.has(fn)) {
-    entries.push(`  '${camisa.padEnd(16)}': '${CDN}${fn}',`);
+    entries.push(`  '${camisa}': '${CDN}${fn}',`);
   }
 }
 
