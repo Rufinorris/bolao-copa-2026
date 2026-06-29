@@ -604,10 +604,7 @@
       if (ph === rh && pa === ra) return b.pts_placar_exato;
       const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
       const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
-      if (vp === vr) {
-        if (ph === rh || pa === ra) return b.pts_vencedor_mais_um_time;
-        return b.pts_vencedor_correto;
-      }
+      if (vp === vr) return b.pts_vencedor_correto; // "vencedor + 1 placar" = vencedor correto
       if (ph === rh || pa === ra) return b.pts_gols_um_time;
       return 0;
     }
@@ -621,8 +618,7 @@
       if (pts === null) return '';
       const total = Math.round(pts * mult);
       if (pts === bolao.pts_placar_exato) return `<span class="jogo-pontos-badge pontos-exato">+${total} pts 🎯</span>`;
-      if (pts === bolao.pts_vencedor_mais_um_time) return `<span class="jogo-pontos-badge pontos-vencedor-gol">+${total} pts ✅</span>`;
-      if (pts === bolao.pts_vencedor_correto) return `<span class="jogo-pontos-badge pontos-vencedor">+${total} pts 👍</span>`;
+      if (pts === bolao.pts_vencedor_correto) return `<span class="jogo-pontos-badge pontos-vencedor">+${total} pts ✅</span>`;
       if (pts === bolao.pts_gols_um_time) return `<span class="jogo-pontos-badge pontos-gol">+${total} pts ⚽</span>`;
       return `<span class="jogo-pontos-badge pontos-zero">0 pts</span>`;
     }
@@ -995,9 +991,8 @@
         `📋 Regras do Bolão — ${b.nome}`,
         '',
         `🎯 Placar exato: ${b.pts_placar_exato} pts`,
-        `⭐ Vencedor + 1 placar: ${b.pts_vencedor_mais_um_time} pts`,
         `✅ Vencedor correto: ${b.pts_vencedor_correto} pts`,
-        `🔸 1 placar acertado: ${b.pts_gols_um_time} pts`,
+        ...(b.pts_gols_um_time > 0 ? [`🔸 1 placar acertado: ${b.pts_gols_um_time} pts`] : []),
         '',
         `Multiplicadores por fase:`,
         `R32 ${mult('round32')} · Oitavas ${mult('oitavas')} · Quartas ${mult('quartas')} · Semis ${mult('semi')} · Final ${mult('final')}`,
@@ -1131,13 +1126,13 @@
       const b = bolao;
       const mult = (f) => b[`mult_${f}`] != null ? `${b[`mult_${f}`]}×` : '—';
 
-      const categorias = [
-        { pts: b.pts_placar_exato,           icon: '🎯', label: 'Placar exato',             desc: 'Acertou os dois placares' },
-        { pts: b.pts_vencedor_mais_um_time,  icon: '⭐', label: 'Vencedor + 1 placar',       desc: 'Vencedor certo e acertou o placar de um dos times' },
-        { pts: b.pts_vencedor_correto,       icon: '✅', label: 'Vencedor correto',           desc: 'Acertou apenas quem ganhou' },
-        { pts: b.pts_gols_um_time,           icon: '🔸', label: '1 placar acertado',          desc: 'Acertou o placar de um time, mas errou o vencedor' },
-        { pts: 0,                            icon: '❌', label: 'Errou',                      desc: 'Nenhuma correspondência' },
+      const todasCategorias = [
+        { pts: b.pts_placar_exato,   icon: '🎯', label: 'Placar exato',      desc: 'Acertou os dois placares' },
+        { pts: b.pts_vencedor_correto, icon: '✅', label: 'Vencedor correto', desc: 'Acertou quem ganhou (inclui acertar um dos placares)' },
+        { pts: b.pts_gols_um_time,   icon: '🔸', label: '1 placar acertado', desc: 'Acertou o placar de um time, mas errou o vencedor' },
+        { pts: 0,                    icon: '❌', label: 'Errou',              desc: 'Nenhuma correspondência', sempre: true },
       ];
+      const categorias = todasCategorias.filter(c => c.pts > 0 || c.sempre);
 
       const fases = [
         { key: 'round32', label: 'Segunda Rodada' },
@@ -1207,11 +1202,11 @@
             Resultado real: <strong style="color:var(--text1)">Brasil 2 × 0 Argentina</strong> — Oitavas (${mult('oitavas')})
           </div>
           ${[
-            { pal: 'Brasil 2 × 0', icon: '🎯', cat: 'Placar exato',        pts: Math.round(b.pts_placar_exato * (b.mult_oitavas || 1)),           color: 'var(--gold)'    },
-            { pal: 'Brasil 2 × 1', icon: '⭐', cat: 'Vencedor + 1 placar', pts: Math.round(b.pts_vencedor_mais_um_time * (b.mult_oitavas || 1)),  color: 'var(--accent2)' },
-            { pal: 'Brasil 3 × 1', icon: '✅', cat: 'Vencedor correto',    pts: Math.round(b.pts_vencedor_correto * (b.mult_oitavas || 1)),        color: 'var(--success)' },
-            { pal: 'Brasil 2 × 3', icon: '🔸', cat: '1 placar acertado',   pts: Math.round(b.pts_gols_um_time * (b.mult_oitavas || 1)),            color: 'var(--text2)'   },
-            { pal: 'Brasil 1 × 2', icon: '❌', cat: 'Errou',               pts: 0,                                                                 color: 'var(--text3)'   },
+            { pal: 'Brasil 2 × 0', icon: '🎯', cat: 'Placar exato',     pts: Math.round(b.pts_placar_exato * (b.mult_oitavas || 1)),     color: 'var(--gold)'  },
+            { pal: 'Brasil 3 × 1', icon: '✅', cat: 'Vencedor correto', pts: Math.round(b.pts_vencedor_correto * (b.mult_oitavas || 1)), color: 'var(--success)'},
+            { pal: 'Brasil 2 × 1', icon: '✅', cat: 'Vencedor correto', pts: Math.round(b.pts_vencedor_correto * (b.mult_oitavas || 1)), color: 'var(--success)'},
+            ...(b.pts_gols_um_time > 0 ? [{ pal: 'Brasil 2 × 3', icon: '🔸', cat: '1 placar acertado', pts: Math.round(b.pts_gols_um_time * (b.mult_oitavas || 1)), color: 'var(--text2)' }] : []),
+            { pal: 'Brasil 1 × 2', icon: '❌', cat: 'Errou',            pts: 0,                                                          color: 'var(--text3)' },
           ].map(r => `
             <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--border)">
               <span style="font-size:15px;width:20px;flex-shrink:0;text-align:center">${r.icon}</span>
@@ -1252,10 +1247,7 @@
       if (ph === rh && pa === ra) return { icon: '🎯', label: 'Placar exato', color: 'var(--gold)' };
       const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
       const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
-      if (vp === vr) {
-        if (ph === rh || pa === ra) return { icon: '⭐', label: 'Vencedor + 1 placar', color: 'var(--accent2)' };
-        return { icon: '✅', label: 'Vencedor correto', color: 'var(--success)' };
-      }
+      if (vp === vr) return { icon: '✅', label: 'Vencedor correto', color: 'var(--success)' };
       if (ph === rh || pa === ra) return { icon: '🔸', label: '1 placar acertado', color: 'var(--text2)' };
       return { icon: '❌', label: 'Errou', color: 'var(--text3)' };
     }
@@ -1267,7 +1259,7 @@
       const faseOrder = ['round32', 'oitavas', 'quartas', 'semi', 'terceiro', 'final'];
 
       // Resumo de acertos para jogos já encerrados
-      const contagem = { exato: 0, vencedorMais: 0, vencedor: 0, gol: 0, errou: 0 };
+      const contagem = { exato: 0, vencedor: 0, gol: 0, errou: 0 };
       let totalPts = 0;
       meusPals.forEach(p => {
         if (p.pontos != null) totalPts += p.pontos;
@@ -1275,13 +1267,12 @@
         if (jogo && jogo.placar_home != null && !jogoAberto(jogo)) {
           const a = labelAcerto(p.placar_home, p.placar_away, jogo.placar_home, jogo.placar_away);
           if (a?.icon === '🎯') contagem.exato++;
-          else if (a?.icon === '⭐') contagem.vencedorMais++;
           else if (a?.icon === '✅') contagem.vencedor++;
           else if (a?.icon === '🔸') contagem.gol++;
           else if (a?.icon === '❌') contagem.errou++;
         }
       });
-      const totalContados = contagem.exato + contagem.vencedorMais + contagem.vencedor + contagem.gol + contagem.errou;
+      const totalContados = contagem.exato + contagem.vencedor + contagem.gol + contagem.errou;
 
       let html = '';
 
@@ -1292,11 +1283,10 @@
             <span style="font-size:22px;font-weight:800;color:var(--gold)">${totalPts} pts</span>
           </div>
           <div style="display:flex;flex-wrap:wrap;gap:6px">
-            ${contagem.exato     ? `<span style="font-size:11px;background:rgba(255,215,0,0.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-weight:700">🎯 ${contagem.exato}×</span>` : ''}
-            ${contagem.vencedorMais ? `<span style="font-size:11px;background:rgba(0,229,176,0.1);color:var(--accent2);border-radius:20px;padding:3px 10px;font-weight:700">⭐ ${contagem.vencedorMais}×</span>` : ''}
-            ${contagem.vencedor  ? `<span style="font-size:11px;background:rgba(0,200,83,0.1);color:var(--success);border-radius:20px;padding:3px 10px;font-weight:700">✅ ${contagem.vencedor}×</span>` : ''}
-            ${contagem.gol       ? `<span style="font-size:11px;background:rgba(255,255,255,0.05);color:var(--text2);border-radius:20px;padding:3px 10px;font-weight:700">🔸 ${contagem.gol}×</span>` : ''}
-            ${contagem.errou     ? `<span style="font-size:11px;background:rgba(255,87,87,0.08);color:var(--text3);border-radius:20px;padding:3px 10px;font-weight:700">❌ ${contagem.errou}×</span>` : ''}
+            ${contagem.exato   ? `<span style="font-size:11px;background:rgba(255,215,0,0.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-weight:700">🎯 ${contagem.exato}×</span>` : ''}
+            ${contagem.vencedor? `<span style="font-size:11px;background:rgba(0,200,83,0.1);color:var(--success);border-radius:20px;padding:3px 10px;font-weight:700">✅ ${contagem.vencedor}×</span>` : ''}
+            ${contagem.gol     ? `<span style="font-size:11px;background:rgba(255,255,255,0.05);color:var(--text2);border-radius:20px;padding:3px 10px;font-weight:700">🔸 ${contagem.gol}×</span>` : ''}
+            ${contagem.errou   ? `<span style="font-size:11px;background:rgba(255,87,87,0.08);color:var(--text3);border-radius:20px;padding:3px 10px;font-weight:700">❌ ${contagem.errou}×</span>` : ''}
           </div>
         </div>`;
       }

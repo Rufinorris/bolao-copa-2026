@@ -1,117 +1,74 @@
-// Edge Function: buscar-placar
-// Chama Claude Haiku + web_search para buscar resultado de um jogo da Copa 2026
-// Fallback para quando o ESPN não funcionar
+import "jsr:@supabase/functions-js/edge-runtime.d.ts";
 
-const CORS = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
-};
+const ANTHROPIC_API_KEY = Deno.env.get("ANTHROPIC_API_KEY") ?? "";
 
 Deno.serve(async (req) => {
-  if (req.method === 'OPTIONS') {
-    return new Response('ok', { headers: CORS });
+  if (req.method === "OPTIONS") {
+    return new Response(null, {
+      headers: {
+        "Access-Control-Allow-Origin": "*",
+        "Access-Control-Allow-Headers": "authorization, content-type",
+      },
+    });
   }
 
-  const apiKey = Deno.env.get('ANTHROPIC_API_KEY');
-  if (!apiKey) {
+  if (!ANTHROPIC_API_KEY) {
     return new Response(
-      JSON.stringify({ error: 'ANTHROPIC_API_KEY não configurada nas variáveis de ambiente da Supabase.' }),
-      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
+      JSON.stringify({ error: "ANTHROPIC_API_KEY nao configurado" }),
+      { status: 500, headers: { "Content-Type": "application/json" } }
     );
   }
 
-  let body: { time_home: string; time_away: string; data_hora: string; fase: string };
-  try {
-    body = await req.json();
-  } catch {
-    return new Response(
-      JSON.stringify({ error: 'Body JSON inválido' }),
-      { status: 400, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
-  }
+  let body;
+  try { body = await req.json(); } catch { return new Response(JSON.stringify({ error: "Body invalido" }), { status: 400 }); }
 
   const { time_home, time_away, data_hora, fase } = body;
-  const dataFormatada = data_hora
-    ? new Date(data_hora).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', timeZone: 'America/Sao_Paulo' })
-    : 'data desconhecida';
+  if (!time_home || !time_away) {
+    return new Response(JSON.stringify({ error: "time_home e time_away obrigatorios" }), { status: 400 });
+  }
 
-  const faseLabel: Record<string, string> = {
-    round32: 'Rodada de 32',
-    oitavas: 'Oitavas de Final',
-    quartas: 'Quartas de Final',
-    semi: 'Semifinal',
-    final: 'Final',
-  };
+  const dataStr = data_hora
+    ? new Date(data_hora).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" })
+    : "data nao informada";
 
-  const prompt = `Copa do Mundo FIFA 2026. Busque o resultado atual do jogo:
-${time_home} vs ${time_away} — ${faseLabel[fase] || fase} — ${dataFormatada}
-
-Retorne SOMENTE um JSON válido, sem markdown, sem texto extra, no formato:
-{
-  "placar_home": <número ou null>,
-  "placar_away": <número ou null>,
-  "status": "<scheduled|live|finished>",
-  "artilheiros": ["<nome completo>"],
-  "fonte": "<URL ou nome da fonte>"
-}
-
-Regras:
-- status "scheduled": jogo ainda não começou → placar_home e placar_away = null
-- status "live": jogo em andamento → placar atual
-- status "finished": jogo encerrado → placar final
-- artilheiros: lista de quem marcou gol (vazia se não encontrar)
-- Se não encontrar o jogo, retorne { "erro": "jogo não encontrado" }`;
+  const prompt = `Voce e um assistente de futebol. Diga o resultado do jogo da Copa do Mundo 2026:
+${time_home} vs ${time_away} em ${dataStr} (${fase ?? "fase nao informada"}).
+Responda APENAS um JSON sem markdown:
+{"placar_home":numero_ou_null,"placar_away":numero_ou_null,"status":"scheduled|live|finished","artilheiros":["NOME1"],"fonte":"fonte"}
+Use nomes de camisa oficiais. Se nao encerrado, placar null e status scheduled.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
+    const resp = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
       headers: {
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'web-search-2025-03-05',
-        'content-type': 'application/json',
+        "x-api-key": ANTHROPIC_API_KEY,
+        "anthropic-version": "2023-06-01",
+        "content-type": "application/json",
       },
       body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{ role: 'user', content: prompt }],
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 256,
+        messages: [{ role: "user", content: prompt }],
       }),
     });
 
-    const data = await resp.json();
-
     if (!resp.ok) {
-      return new Response(
-        JSON.stringify({ error: `Claude API error: ${data.error?.message || resp.status}` }),
-        { status: 502, headers: { ...CORS, 'Content-Type': 'application/json' } }
-      );
+      const err = await resp.text();
+      return new Response(JSON.stringify({ error: "Erro Claude API: " + err }), { status: 500 });
     }
 
-    // Extrai o último bloco de texto (após tool use)
-    let textoFinal = '';
-    for (const block of data.content || []) {
-      if (block.type === 'text') textoFinal = block.text;
-    }
-
-    // Parse JSON da resposta
-    const jsonMatch = textoFinal.match(/\{[\s\S]*\}/);
+    const data = await resp.json();
+    const text = data.content?.[0]?.text ?? "";
+    const jsonMatch = text.match(/\{[\s\S]*\}/);
     if (!jsonMatch) {
-      return new Response(
-        JSON.stringify({ error: 'Resposta não contém JSON', raw: textoFinal }),
-        { status: 502, headers: { ...CORS, 'Content-Type': 'application/json' } }
-      );
+      return new Response(JSON.stringify({ error: "JSON invalido", raw: text }), { status: 500 });
     }
 
     const resultado = JSON.parse(jsonMatch[0]);
-    return new Response(
-      JSON.stringify(resultado),
-      { headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify(resultado), {
+      headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" },
+    });
   } catch (e) {
-    return new Response(
-      JSON.stringify({ error: String(e) }),
-      { status: 500, headers: { ...CORS, 'Content-Type': 'application/json' } }
-    );
+    return new Response(JSON.stringify({ error: String(e) }), { status: 500 });
   }
 });
