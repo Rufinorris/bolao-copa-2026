@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Bolão Copa 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    body { padding-bottom: 40px; }
+    .artilheiro-admin {
+      padding: 10px 14px 12px;
+      border-top: 1px solid var(--glass-border);
+      background: rgba(255,215,0,0.03);
+    }
+    .artilheiro-admin-label {
+      font-size: 10px; font-weight: 800; color: rgba(255,215,0,0.5);
+      text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .artilheiro-admin-select {
+      width: 100%; background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border); border-radius: 8px;
+      padding: 8px 12px; color: var(--text); font-family: var(--font);
+      font-size: 13px; font-weight: 600; outline: none; cursor: pointer;
+      transition: border-color 0.2s;
+    }
+    .artilheiro-admin-select:focus { border-color: var(--gold); }
+    .artilheiro-admin-select option { background: #1a1d2e; }
+    .espn-sync-btn {
+      display: flex; align-items: center; gap: 6px; padding: 7px 12px;
+      border-radius: 8px; border: 1px solid rgba(0,229,176,0.3);
+      background: rgba(0,229,176,0.08); color: var(--accent2);
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: var(--font); transition: all 0.2s;
+    }
+    .espn-sync-btn:hover { background: rgba(0,229,176,0.15); }
+    .espn-sync-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .part-row {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 16px; border-bottom: 1px solid var(--border);
+    }
+    .part-row:last-child { border-bottom: none; }
+    .part-avatar {
+      width: 38px; height: 38px; border-radius: 50%;
+      background: var(--bg3); display: flex; align-items: center;
+      justify-content: center; font-size: 15px; font-weight: 700;
+      color: var(--accent); flex-shrink: 0;
+    }
+    .part-info { flex: 1; min-width: 0; }
+    .part-nome { font-size: 14px; font-weight: 600; }
+    .part-email { font-size: 12px; color: var(--text2); }
+    .toggle-pag {
+      padding: 6px 14px; border-radius: 20px; border: none;
+      font-size: 12px; font-weight: 700; cursor: pointer;
+      font-family: var(--font); transition: all 0.15s;
+    }
+    .toggle-pag.pago { background: rgba(0,200,83,0.15); color: var(--success); }
+    .toggle-pag.pendente { background: rgba(255,171,64,0.15); color: var(--warning); }
+
+    .jogo-admin-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 14px; margin: 8px 16px; overflow: hidden;
+    }
+    .jogo-admin-header {
+      padding: 8px 14px; background: var(--bg3);
+      font-size: 12px; color: var(--text2);
+      display: flex; justify-content: space-between;
+    }
+    .jogo-admin-body { padding: 14px; }
+    .jogo-admin-times {
+      display: flex; align-items: center; gap: 10px;
+      justify-content: center; margin-bottom: 12px;
+    }
+    .jogo-admin-time { text-align: center; flex: 1; }
+    .jogo-admin-flag { font-size: 28px; }
+    .jogo-admin-nome { font-size: 12px; font-weight: 600; margin-top: 4px; }
+    .placar-inputs {
+      display: flex; align-items: center; gap: 8px; justify-content: center;
+    }
+    .placar-input {
+      width: 56px; text-align: center; padding: 10px 4px;
+      font-size: 22px; font-weight: 800;
+      background: var(--bg3); border: 2px solid var(--border);
+      border-radius: 10px; color: var(--text); font-family: var(--font);
+      outline: none; transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+    .placar-input::-webkit-outer-spin-button,
+    .placar-input::-webkit-inner-spin-button { -webkit-appearance: none; }
+    .placar-input:focus { border-color: var(--accent); }
+    .placar-sep { font-size: 20px; color: var(--text2); }
+    .jogo-admin-footer {
+      padding: 10px 14px; border-top: 1px solid var(--border);
+      display: flex; gap: 8px; align-items: center;
+    }
+    .status-select {
+      background: var(--bg3); border: 1px solid var(--border);
+      border-radius: 8px; padding: 6px 10px; color: var(--text);
+      font-family: var(--font); font-size: 13px; outline: none;
+    }
+    .atualizar-btn {
+      flex: 1; padding: 8px; border-radius: 8px; border: none;
+      background: var(--accent); color: #fff; font-weight: 600;
+      font-size: 13px; cursor: pointer; font-family: var(--font);
+    }
+    .recalc-btn {
+      width: 100%; padding: 10px; border-radius: 10px; border: none;
+      background: var(--accent2); color: var(--bg); font-weight: 700;
+      font-size: 14px; cursor: pointer; font-family: var(--font);
+      margin-top: 8px;
+    }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 16px; }
+    .stat-card {
+      background: var(--bg2); border: 1px solid var(--border);
+      border-radius: 12px; padding: 14px; text-align: center;
+    }
+    .stat-val { font-size: 24px; font-weight: 800; color: var(--accent2); }
+    .stat-label { font-size: 12px; color: var(--text2); margin-top: 4px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="header-back" id="back-btn">‹</button>
+    <span style="font-weight:700;font-size:16px">⚙️ Admin</span>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="tabs-scroll">
+    <div class="tabs">
+      <button class="tab active" onclick="mudarAba('participantes',this)">👥 Participantes</button>
+      <button class="tab" onclick="mudarAba('resultados',this)">⚽ Resultados</button>
+      <button class="tab" onclick="mudarAba('config',this)">⚙️ Config</button>
+    </div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stat-grid" id="stats">
+    <div class="stat-card"><div class="stat-val" id="st-total">—</div><div class="stat-label">Participantes</div></div>
+    <div class="stat-card"><div class="stat-val" id="st-pagos">—</div><div class="stat-label">Pagamentos</div></div>
+    <div class="stat-card"><div class="stat-val" id="st-premio">—</div><div class="stat-label">Prêmio total</div></div>
+    <div class="stat-card"><div class="stat-val" id="st-palpites">—</div><div class="stat-label">Palpites feitos</div></div>
+  </div>
+
+  <!-- ABA PARTICIPANTES -->
+  <div id="aba-participantes" class="tab-content active">
+    <div style="padding:0 16px 8px;display:flex;justify-content:space-between;align-items:center">
+      <div class="section-title" style="margin:0">Aguardando confirmação</div>
+    </div>
+    <div class="card" style="margin:0 16px 16px;padding:0;overflow:hidden" id="lista-pendentes">
+      <div class="loading-full"><div class="spinner"></div></div>
+    </div>
+    <div style="padding:0 16px 8px" class="section-title">Confirmados</div>
+    <div class="card" style="margin:0 16px;padding:0;overflow:hidden" id="lista-pagos">
+      <div class="loading-full"><div class="spinner"></div></div>
+    </div>
+
+    <div style="padding:16px 16px 8px;display:flex;justify-content:space-between;align-items:center">
+      <div class="section-title" style="margin:0">Próximos jogos — quem palpitou</div>
+    </div>
+    <div id="cobertura-content" style="margin:0 16px 16px">
+      <div class="loading-full"><div class="spinner"></div></div>
+    </div>
+  </div>
+
+  <!-- ABA RESULTADOS -->
+  <div id="aba-resultados" class="tab-content">
+    <div style="padding:12px 16px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+      <div class="section-title" style="margin:0">Atualizar Placares</div>
+      <div style="display:flex;gap:6px">
+        <button class="espn-sync-btn" id="btn-espn" onclick="sincronizarEspn()">📡 ESPN Auto</button>
+        <button class="btn btn-secondary btn-sm" onclick="recalcularTudo()">🔄 Recalcular</button>
+      </div>
+    </div>
+
+    <!-- Sub-tabs de fase -->
+    <div class="tabs-scroll" style="position:static;margin-top:8px">
+      <div class="tabs" id="fases-tabs-inner"></div>
+    </div>
+    <div id="jogos-admin-content">
+      <div class="loading-full"><div class="spinner"></div>Carregando jogos...</div>
+    </div>
+  </div>
+
+  <!-- ABA CONFIG -->
+  <div id="aba-config" class="tab-content">
+    <div style="padding:16px">
+      <div class="section-title">Link do Bolão</div>
+      <div class="card" style="display:flex;align-items:center;gap:10px">
+        <span id="link-bolao" style="font-size:13px;color:var(--text2);flex:1;word-break:break-all"></span>
+        <button class="btn btn-secondary btn-sm" onclick="copiarLink()">Copiar</button>
+      </div>
+
+      <div class="section-title" style="margin-top:16px">Pontuação</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:12px 16px 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px">Acertos</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0">
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Placar exato</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-pts-placar-exato" min="0" max="999" style="width:56px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:14px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:12px;color:var(--text3)">pts</span>
+            </div>
+          </div>
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Vencedor correto</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-pts-vencedor" min="0" max="999" style="width:56px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:14px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:12px;color:var(--text3)">pts</span>
+            </div>
+          </div>
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">Vencedor + 1 placar</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-pts-vencedor-um" min="0" max="999" style="width:56px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:14px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:12px;color:var(--text3)">pts</span>
+            </div>
+          </div>
+          <div style="padding:10px 16px;border-bottom:1px solid var(--border)">
+            <div style="font-size:12px;color:var(--text2);margin-bottom:4px">1 placar correto</div>
+            <div style="display:flex;align-items:center;gap:4px">
+              <input type="number" id="cfg-pts-gol-um" min="0" max="999" style="width:56px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:14px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:12px;color:var(--text3)">pts</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="padding:12px 16px 4px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.6px;border-top:1px solid var(--border)">Multiplicadores por fase</div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:0">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">R32</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <input type="number" id="cfg-mult-round32" min="1" max="99" step="0.5" style="width:46px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:13px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:11px;color:var(--text3)">×</span>
+            </div>
+          </div>
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Oitavas</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <input type="number" id="cfg-mult-oitavas" min="1" max="99" step="0.5" style="width:46px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:13px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:11px;color:var(--text3)">×</span>
+            </div>
+          </div>
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border)">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Quartas</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <input type="number" id="cfg-mult-quartas" min="1" max="99" step="0.5" style="width:46px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:13px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:11px;color:var(--text3)">×</span>
+            </div>
+          </div>
+          <div style="padding:10px 12px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Semis</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <input type="number" id="cfg-mult-semi" min="1" max="99" step="0.5" style="width:46px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:13px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:11px;color:var(--text3)">×</span>
+            </div>
+          </div>
+          <div style="padding:10px 12px">
+            <div style="font-size:11px;color:var(--text2);margin-bottom:4px">Final</div>
+            <div style="display:flex;align-items:center;gap:2px">
+              <input type="number" id="cfg-mult-final" min="1" max="99" step="0.5" style="width:46px;padding:4px 6px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:13px;font-weight:700;text-align:center;font-family:var(--font)">
+              <span style="font-size:11px;color:var(--text3)">×</span>
+            </div>
+          </div>
+        </div>
+
+        <div style="border-top:1px solid var(--border)">
+          <div class="switch" style="padding:14px 16px">
+            <div>
+              <div class="switch-label">⚽ Bônus goleador</div>
+              <div class="switch-desc">Pontos extras por acertar o marcador</div>
+            </div>
+            <div class="toggle" id="toggle-artilheiro" onclick="toggleArtilheiro()"></div>
+          </div>
+          <div id="cfg-bonus-row" style="padding:4px 16px 12px;display:flex;align-items:center;gap:8px">
+            <span style="font-size:13px;color:var(--text2)">Pontos por acerto:</span>
+            <input type="number" id="cfg-pts-bonus" min="0" max="99" style="width:56px;padding:4px 8px;border-radius:8px;border:1px solid var(--border);background:var(--glass);color:var(--text1);font-size:14px;font-weight:700;text-align:center;font-family:var(--font)">
+            <span style="font-size:12px;color:var(--text3)">pts</span>
+          </div>
+        </div>
+
+        <div style="padding:12px 16px;border-top:1px solid var(--border)">
+          <button class="btn btn-primary btn-full" onclick="salvarPontuacao()">Salvar e recalcular pontos</button>
+        </div>
+      </div>
+
+      <div class="section-title" style="margin-top:16px">Ações</div>
+      <div class="card" style="padding:0;overflow:hidden">
+        <div class="switch" style="padding:14px 16px">
+          <div>
+            <div class="switch-label">🔒 Bloquear palpites</div>
+            <div class="switch-desc">Impede novos palpites de todos</div>
+          </div>
+          <div class="toggle" id="toggle-bloqueio" onclick="toggleBloqueio()"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-danger btn-full" style="margin-top:16px" onclick="confirmarEncerrar()">
+        Encerrar bolão
+      </button>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/elencos.js"></script>
+  <script src="js/espn.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const bolaoId = params.get('id');
+    let bolao = null;
+    let participantes = [];
+    let jogos = [];
+    let todosPalpitesAdmin = [];
+    const FASES_ORDER = ['round32','oitavas','quartas','semi','final'];
+    let faseAtiva = 'round32';
+
+    document.getElementById('back-btn').onclick = () => location.href = `bolao.html?id=${bolaoId}`;
+
+    async function init() {
+      const user = await getUser();
+      if (!user) { location.href = 'index.html'; return; }
+
+      const { data } = await db.from('boloes').select('*').eq('id', bolaoId).single();
+      if (!data || data.admin_id !== user.id) { location.href = 'index.html'; return; }
+      bolao = data;
+
+      document.getElementById('link-bolao').textContent =
+        `${location.origin}${location.pathname.replace('admin.html','bolao.html')}?id=${bolaoId}`;
+
+      if (bolao.palpites_bloqueados) {
+        document.getElementById('toggle-bloqueio').classList.add('on');
+      }
+
+      await carregarParticipantes();
+      await carregarJogos();
+      await carregarPalpitesAdmin();
+      renderFasesTabs();
+      renderJogosAdmin();
+      renderCobertura();
+      preencherCamposPontuacao();
+    }
+
+    async function carregarParticipantes() {
+      const { data } = await db.from('participantes')
+        .select('*').eq('bolao_id', bolaoId).order('created_at');
+      participantes = data || [];
+      renderParticipantes();
+      atualizarStats();
+    }
+
+    async function carregarJogos() {
+      const { data } = await db.from('jogos').select('*').order('fase').order('data_hora', { nullsFirst: false });
+      jogos = data || [];
+    }
+
+    function atualizarStats() {
+      const pagos = participantes.filter(p => p.pagamento_confirmado).length;
+      const premio = pagos * (bolao.valor_entrada || 0);
+      document.getElementById('st-total').textContent = participantes.length;
+      document.getElementById('st-pagos').textContent = `${pagos}/${participantes.length}`;
+      document.getElementById('st-premio').textContent = formatMoeda(premio);
+    }
+
+    function renderParticipantes() {
+      const pendentes = participantes.filter(p => !p.pagamento_confirmado);
+      const pagos = participantes.filter(p => p.pagamento_confirmado);
+
+      const htmlPart = (p) => `
+        <div class="part-row">
+          <div class="part-avatar">${iniciais(p.nome)}</div>
+          <div class="part-info">
+            <div class="part-nome">${p.nome}</div>
+            <div class="part-email">${formatData(p.created_at)}</div>
+          </div>
+          <button class="toggle-pag ${p.pagamento_confirmado ? 'pago' : 'pendente'}"
+            onclick="togglePagamento('${p.id}', ${p.pagamento_confirmado})">
+            ${p.pagamento_confirmado ? '✓ Pago' : '⏳ Pendente'}
+          </button>
+        </div>`;
+
+      document.getElementById('lista-pendentes').innerHTML = pendentes.length
+        ? pendentes.map(htmlPart).join('')
+        : '<div style="padding:20px;text-align:center;font-size:14px;color:var(--text2)">Nenhum pendente 🎉</div>';
+
+      document.getElementById('lista-pagos').innerHTML = pagos.length
+        ? pagos.map(htmlPart).join('')
+        : '<div style="padding:20px;text-align:center;font-size:14px;color:var(--text2)">Nenhum confirmado ainda</div>';
+    }
+
+    async function carregarPalpitesAdmin() {
+      const { data } = await db.from('palpites')
+        .select('participante_id, jogo_id')
+        .eq('bolao_id', bolaoId);
+      todosPalpitesAdmin = data || [];
+      document.getElementById('st-palpites').textContent = todosPalpitesAdmin.length;
+    }
+
+    function renderCobertura() {
+      const el = document.getElementById('cobertura-content');
+      if (!jogos.length || !participantes.length) {
+        el.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text2)">Sem dados</div>';
+        return;
+      }
+
+      const agora = new Date();
+      const proximos = jogos
+        .filter(j => j.data_hora && new Date(j.data_hora) > agora)
+        .sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora))
+        .slice(0, 6);
+
+      if (!proximos.length) {
+        el.innerHTML = '<div style="padding:16px;text-align:center;font-size:13px;color:var(--text2)">Nenhum jogo futuro</div>';
+        return;
+      }
+
+      const palpitouSet = new Set(todosPalpitesAdmin.map(p => `${p.participante_id}:${p.jogo_id}`));
+
+      el.innerHTML = proximos.map(j => {
+        const faltam = participantes.filter(p => !palpitouSet.has(`${p.id}:${j.id}`));
+        const total = participantes.length;
+        const feitos = total - faltam.length;
+        const tudo = faltam.length === 0;
+        const dataStr = j.data_hora
+          ? new Date(j.data_hora).toLocaleString('pt-BR', { weekday:'short', day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit' })
+          : 'A definir';
+
+        return `<div class="card" style="margin-bottom:8px;padding:12px 14px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <span style="font-size:13px;font-weight:700">${j.time_home_flag} ${j.time_home} × ${j.time_away} ${j.time_away_flag}</span>
+            <span style="font-size:12px;font-weight:700;color:${tudo ? 'var(--success)' : 'var(--warning)'}">
+              ${feitos}/${total}
+            </span>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-bottom:${faltam.length ? '8px' : '0'}">${dataStr}</div>
+          ${faltam.length ? `<div style="font-size:12px;color:var(--warning)">❌ Faltam: ${faltam.map(p => p.nome).join(', ')}</div>` : `<div style="font-size:12px;color:var(--success)">✅ Todos palpitaram</div>`}
+        </div>`;
+      }).join('');
+    }
+
+    async function togglePagamento(partId, atual) {
+      const novo = !atual;
+      const { error } = await db.from('participantes').update({
+        pagamento_confirmado: novo,
+        pagamento_confirmado_em: novo ? new Date().toISOString() : null
+      }).eq('id', partId);
+
+      if (!error) {
+        await carregarParticipantes();
+        showToast(novo ? 'Pagamento confirmado ✓' : 'Pagamento removido', novo ? 'success' : '');
+      }
+    }
+
+    function renderFasesTabs() {
+      const fases = FASES_ORDER.filter(f => jogos.some(j => j.fase === f));
+      const inner = document.getElementById('fases-tabs-inner');
+      inner.innerHTML = fases.map(f => `
+        <button class="tab ${f === faseAtiva ? 'active' : ''}"
+          onclick="mudarFaseAdmin('${f}',this)">${nomeFase(f)}</button>`).join('');
+    }
+
+    function mudarFaseAdmin(fase, el) {
+      faseAtiva = fase;
+      document.querySelectorAll('#fases-tabs-inner .tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderJogosAdmin();
+    }
+
+    function renderJogosAdmin() {
+      const content = document.getElementById('jogos-admin-content');
+      const jogosFase = jogos.filter(j => j.fase === faseAtiva);
+
+      if (!jogosFase.length) {
+        content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🗓️</div><div class="empty-state-title">Sem jogos nesta fase</div></div>';
+        return;
+      }
+
+      content.innerHTML = jogosFase.map(jogo => {
+        const jogH = typeof getJogadoresPorTime !== 'undefined' ? getJogadoresPorTime(jogo.time_home) : [];
+        const jogA = typeof getJogadoresPorTime !== 'undefined' ? getJogadoresPorTime(jogo.time_away) : [];
+        const temArtilheiro = bolao.bonus_artilheiro_ativo && (jogH.length > 0 || jogA.length > 0);
+        const artSalvo = Array.isArray(jogo.artilheiro_confirmado)
+          ? (jogo.artilheiro_confirmado[0] || '')
+          : (jogo.artilheiro_confirmado || '');
+
+        const optsH = jogH.map(j => `<option value="${j}" ${artSalvo===j?'selected':''}>${jogo.time_home_flag||'🛡️'} ${j}</option>`).join('');
+        const optsA = jogA.map(j => `<option value="${j}" ${artSalvo===j?'selected':''}>${jogo.time_away_flag||'🛡️'} ${j}</option>`).join('');
+
+        const artilheiroSection = temArtilheiro ? `
+          <div class="artilheiro-admin" id="art-section-${jogo.id}">
+            <div class="artilheiro-admin-label">⚽ Quem fez gol? <span style="color:var(--gold);font-size:10px">bônus +${bolao.pts_bonus_artilheiro} pts p/ acerto</span></div>
+            <select class="artilheiro-admin-select" id="art-sel-${jogo.id}">
+              <option value="">— Nenhum / não definido —</option>
+              ${jogH.length ? `<optgroup label="${jogo.time_home_flag||'🛡️'} ${jogo.time_home}">${optsH}</optgroup>` : ''}
+              ${jogA.length ? `<optgroup label="${jogo.time_away_flag||'🛡️'} ${jogo.time_away}">${optsA}</optgroup>` : ''}
+            </select>
+          </div>` : '';
+
+        return `
+        <div class="jogo-admin-card">
+          <div class="jogo-admin-header">
+            <span>${formatData(jogo.data_hora)}</span>
+            <span style="color:${jogo.status==='live'?'var(--danger)':jogo.status==='finished'?'var(--success)':'var(--text2)'}">
+              ${jogo.status==='live'?'🔴 AO VIVO':jogo.status==='finished'?'✅ Encerrado':'⏳ Agendado'}
+            </span>
+          </div>
+          <div class="jogo-admin-body">
+            <div class="jogo-admin-times">
+              <div class="jogo-admin-time">
+                <input type="text" id="fh-${jogo.id}" value="${jogo.time_home_flag||''}" placeholder="🛡️"
+                  style="background:none;border:none;font-size:22px;text-align:center;width:36px;padding:0;outline:none;cursor:text">
+                <input type="text" class="time-nome-input" id="th-${jogo.id}"
+                  value="${jogo.time_home}" placeholder="Time casa"
+                  style="background:none;border:none;border-bottom:1px solid var(--glass-border);color:var(--text1);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;width:80px;padding:2px 4px;outline:none">
+              </div>
+              <div class="placar-inputs">
+                <input type="number" min="0" max="20" class="placar-input"
+                  id="rh-${jogo.id}" value="${jogo.placar_home??''}" placeholder="0">
+                <span class="placar-sep">×</span>
+                <input type="number" min="0" max="20" class="placar-input"
+                  id="ra-${jogo.id}" value="${jogo.placar_away??''}" placeholder="0">
+              </div>
+              <div class="jogo-admin-time">
+                <input type="text" id="fa-${jogo.id}" value="${jogo.time_away_flag||''}" placeholder="🛡️"
+                  style="background:none;border:none;font-size:22px;text-align:center;width:36px;padding:0;outline:none;cursor:text">
+                <input type="text" class="time-nome-input" id="ta-${jogo.id}"
+                  value="${jogo.time_away}" placeholder="Time fora"
+                  style="background:none;border:none;border-bottom:1px solid var(--glass-border);color:var(--text1);font-family:var(--font);font-size:12px;font-weight:700;text-align:center;width:80px;padding:2px 4px;outline:none">
+              </div>
+            </div>
+          </div>
+          ${artilheiroSection}
+          <div class="jogo-admin-footer">
+            <select class="status-select" id="st-${jogo.id}">
+              <option value="scheduled" ${jogo.status==='scheduled'?'selected':''}>Agendado</option>
+              <option value="live" ${jogo.status==='live'?'selected':''}>Ao vivo</option>
+              <option value="finished" ${jogo.status==='finished'?'selected':''}>Encerrado</option>
+            </select>
+            <button class="atualizar-btn" title="Buscar via IA (Claude)" onclick="buscarViaIA('${jogo.id}')" id="ia-btn-${jogo.id}" style="background:rgba(108,99,255,0.15);border-color:rgba(108,99,255,0.4);color:var(--accent)">🤖</button>
+            <button class="atualizar-btn" onclick="salvarResultado('${jogo.id}')">Salvar</button>
+          </div>
+          <div style="padding:8px 14px;border-top:1px solid var(--border)">
+            <button onclick="toggleOverrideAberto('${jogo.id}', ${!jogo.override_aberto})"
+              style="width:100%;padding:7px;border-radius:8px;border:1px solid ${jogo.override_aberto?'var(--warning)':'var(--glass-border)'};background:${jogo.override_aberto?'rgba(255,171,64,0.12)':'none'};color:${jogo.override_aberto?'var(--warning)':'var(--text2)'};font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font)">
+              ${jogo.override_aberto ? '🔓 Palpite liberado — clique para fechar' : '🔓 Liberar palpite fora do prazo'}
+            </button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function toggleOverrideAberto(jogoId, valor) {
+      const { error } = await db.from('jogos').update({ override_aberto: valor }).eq('id', jogoId);
+      if (!error) {
+        const idx = jogos.findIndex(j => j.id === jogoId);
+        if (idx >= 0) jogos[idx].override_aberto = valor;
+        renderJogosAdmin();
+        showToast(valor ? '🔓 Palpite liberado para este jogo' : '🔒 Liberação removida', valor ? 'success' : '');
+      }
+    }
+
+    function getArtilheirosAdmin(jogoId) {
+      const sel = document.getElementById(`art-sel-${jogoId}`);
+      return sel?.value ? [sel.value] : [];
+    }
+
+    async function salvarResultado(jogoId) {
+      const ph = document.getElementById(`rh-${jogoId}`).value;
+      const pa = document.getElementById(`ra-${jogoId}`).value;
+      const status = document.getElementById(`st-${jogoId}`).value;
+      const artilheiros = getArtilheirosAdmin(jogoId);
+      const nomeH = document.getElementById(`th-${jogoId}`)?.value.trim();
+      const nomeA = document.getElementById(`ta-${jogoId}`)?.value.trim();
+      const flagH = document.getElementById(`fh-${jogoId}`)?.value.trim();
+      const flagA = document.getElementById(`fa-${jogoId}`)?.value.trim();
+
+      const update = { status };
+      if (ph !== '') update.placar_home = parseInt(ph);
+      if (pa !== '') update.placar_away = parseInt(pa);
+      if (nomeH) { update.time_home = nomeH; update.time_home_flag = flagH || FLAGS_MAP[nomeH] || null; }
+      if (nomeA) { update.time_away = nomeA; update.time_away_flag = flagA || FLAGS_MAP[nomeA] || null; }
+      if (ph !== '' && pa !== '') {
+        const h = parseInt(ph), a = parseInt(pa);
+        update.vencedor = h > a ? 'home' : h < a ? 'away' : null;
+      }
+      // Sempre salva o array (mesmo vazio = nenhum marcador confirmado)
+      update.artilheiro_confirmado = artilheiros;
+
+      const { error } = await db.from('jogos').update(update).eq('id', jogoId);
+      if (!error) {
+        const idx = jogos.findIndex(j => j.id === jogoId);
+        if (idx >= 0) jogos[idx] = { ...jogos[idx], ...update };
+        showToast('Resultado salvo!', 'success');
+        if (status === 'finished') {
+          // Reset calculado=false para recalcular mesmo se já foi calculado antes
+          await db.from('palpites').update({ calculado: false, pontos: null }).eq('jogo_id', jogoId);
+          await calcularPontosPorJogo(jogoId);
+        }
+      }
+    }
+
+    async function calcularPontosPorJogo(jogoId) {
+      const jogo = jogos.find(j => j.id === jogoId);
+      if (!jogo || jogo.placar_home === null) return;
+
+      // Busca TODOS os palpites (calculado ou não) para recalcular com o resultado atual
+      const { data: palpites } = await db.from('palpites')
+        .select('*').eq('jogo_id', jogoId);
+
+      if (!palpites?.length) {
+        // Sem palpites no jogo, ainda recalcula ranking (pode ter mudado de outros jogos)
+        const { error: rErr } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+        if (rErr) console.error('[ranking] recalcular_ranking error:', rErr);
+        return;
+      }
+
+      const mult = { round32: bolao.mult_round32, oitavas: bolao.mult_oitavas, quartas: bolao.mult_quartas, semi: bolao.mult_semi, final: bolao.mult_final, terceiro: 1 }[jogo.fase] || 1;
+      const artConfirmados = Array.isArray(jogo.artilheiro_confirmado)
+        ? jogo.artilheiro_confirmado.map(a => a.toLowerCase().trim())
+        : [];
+
+      for (const pal of palpites) {
+        let pts = calcPts(pal.placar_home, pal.placar_away, jogo.placar_home, jogo.placar_away);
+        let total = Math.round(pts * mult);
+
+        if (bolao.bonus_artilheiro_ativo && artConfirmados.length && pal.artilheiro) {
+          if (artConfirmados.includes(pal.artilheiro.toLowerCase().trim())) {
+            total += bolao.pts_bonus_artilheiro;
+          }
+        }
+
+        const { error: pErr } = await db.from('palpites')
+          .update({ pontos: total, calculado: true }).eq('id', pal.id);
+        if (pErr) console.error('[ranking] erro ao atualizar palpite', pal.id, pErr);
+      }
+
+      const { error: rErr } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      if (rErr) {
+        console.error('[ranking] recalcular_ranking error:', rErr);
+        showToast('Erro ao recalcular ranking: ' + rErr.message, '');
+      } else {
+        showToast('Pontos calculados! ✓', 'success');
+      }
+    }
+
+    async function sincronizarEspn() {
+      const btn = document.getElementById('btn-espn');
+      btn.disabled = true;
+      btn.textContent = '⏳ Buscando...';
+      try {
+        // Sem data específica = busca o bracket inteiro (R32 até Final)
+        const atualizacoes = await espnSincronizar(jogos, null);
+        if (!atualizacoes.length) {
+          showToast('ESPN: nenhum confronto encontrado (verifique console)', '');
+          console.warn('[ESPN] espnSincronizar retornou 0 atualizações. Jogos no banco:', jogos.length);
+          return;
+        }
+        let atualizados = 0;
+        for (const upd of atualizacoes) {
+          const update = { status: upd.status };
+
+          // Corrige data/hora com o valor real da ESPN (fix datas estimadas na inserção)
+          if (upd.data_hora) update.data_hora = upd.data_hora;
+
+          // Preenche times se ainda forem "A definir"
+          const jAtual = jogos.find(j => j.id === upd.id);
+          if (upd.time_home && (!jAtual?.time_home || jAtual.time_home === 'A definir')) {
+            update.time_home = upd.time_home;
+            update.time_home_flag = upd.time_home_flag;
+          }
+          if (upd.time_away && (!jAtual?.time_away || jAtual.time_away === 'A definir')) {
+            update.time_away = upd.time_away;
+            update.time_away_flag = upd.time_away_flag;
+          }
+
+          // Placar: não sobrescreve se admin já encerrou manualmente
+          const jaEncerradoManual = jAtual?.status === 'finished' && jAtual?.placar_home !== null && jAtual?.placar_home !== undefined;
+          if (upd.status !== 'scheduled' && upd.placar_home !== undefined && !jaEncerradoManual) {
+            update.placar_home = upd.placar_home;
+            update.placar_away = upd.placar_away;
+            const h = upd.placar_home, a = upd.placar_away;
+            if (upd.status === 'finished') {
+              update.vencedor = h > a ? 'home' : h < a ? 'away' : null;
+            }
+          }
+
+          // Artilheiro (único — primeiro da lista ESPN)
+          if (upd.artilheiros?.length) {
+            update.artilheiro_confirmado = [upd.artilheiros[0]];
+          }
+
+          const { error } = await db.from('jogos').update(update).eq('id', upd.id);
+          if (!error) {
+            const idx = jogos.findIndex(j => j.id === upd.id);
+            if (idx >= 0) jogos[idx] = { ...jogos[idx], ...update };
+            if (upd.status === 'finished') await calcularPontosPorJogo(upd.id);
+            atualizados++;
+          }
+        }
+        renderFasesTabs();
+        renderJogosAdmin();
+        showToast(`ESPN: ${atualizados} jogo(s) sincronizado(s) ✓`, 'success');
+      } catch (e) {
+        showToast('Erro ESPN: ' + e.message, '');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '📡 ESPN Auto';
+      }
+    }
+
+    function calcPts(ph, pa, rh, ra) {
+      if (ph === rh && pa === ra) return bolao.pts_placar_exato;
+      const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
+      const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
+      if (vp === vr) {
+        if (ph === rh || pa === ra) return bolao.pts_vencedor_mais_um_time;
+        return bolao.pts_vencedor_correto;
+      }
+      if (ph === rh || pa === ra) return bolao.pts_gols_um_time;
+      return 0;
+    }
+
+    async function recalcularTudo() {
+      const btn = event.target;
+      btn.textContent = 'Recalculando...';
+      btn.disabled = true;
+
+      // Reset todos os palpites de jogos encerrados para recalcular do zero
+      const jogosEncerrados = jogos.filter(j => j.status === 'finished');
+      for (const jogo of jogosEncerrados) {
+        await db.from('palpites').update({ calculado: false, pontos: null }).eq('jogo_id', jogo.id);
+        await calcularPontosPorJogo(jogo.id);
+      }
+      await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      showToast('Ranking recalculado!', 'success');
+      btn.textContent = '🔄 Recalcular pontos';
+      btn.disabled = false;
+    }
+
+    function preencherCamposPontuacao() {
+      if (!bolao) return;
+      document.getElementById('cfg-pts-placar-exato').value  = bolao.pts_placar_exato ?? 25;
+      document.getElementById('cfg-pts-vencedor').value      = bolao.pts_vencedor_correto ?? 15;
+      document.getElementById('cfg-pts-vencedor-um').value   = bolao.pts_vencedor_mais_um_time ?? 18;
+      document.getElementById('cfg-pts-gol-um').value        = bolao.pts_gols_um_time ?? 4;
+      document.getElementById('cfg-mult-round32').value      = bolao.mult_round32 ?? 1;
+      document.getElementById('cfg-mult-oitavas').value      = bolao.mult_oitavas ?? 2;
+      document.getElementById('cfg-mult-quartas').value      = bolao.mult_quartas ?? 3;
+      document.getElementById('cfg-mult-semi').value         = bolao.mult_semi ?? 4;
+      document.getElementById('cfg-mult-final').value        = bolao.mult_final ?? 5;
+      document.getElementById('cfg-pts-bonus').value         = bolao.pts_bonus_artilheiro ?? 5;
+      document.getElementById('toggle-artilheiro').classList.toggle('on', !!bolao.bonus_artilheiro_ativo);
+    }
+
+    function toggleArtilheiro() {
+      const toggle = document.getElementById('toggle-artilheiro');
+      toggle.classList.toggle('on');
+    }
+
+    async function salvarPontuacao() {
+      const update = {
+        pts_placar_exato:          parseInt(document.getElementById('cfg-pts-placar-exato').value)  || 0,
+        pts_vencedor_correto:      parseInt(document.getElementById('cfg-pts-vencedor').value)      || 0,
+        pts_vencedor_mais_um_time: parseInt(document.getElementById('cfg-pts-vencedor-um').value)   || 0,
+        pts_gols_um_time:          parseInt(document.getElementById('cfg-pts-gol-um').value)        || 0,
+        mult_round32:              parseFloat(document.getElementById('cfg-mult-round32').value)    || 1,
+        mult_oitavas:              parseFloat(document.getElementById('cfg-mult-oitavas').value)    || 1,
+        mult_quartas:              parseFloat(document.getElementById('cfg-mult-quartas').value)    || 1,
+        mult_semi:                 parseFloat(document.getElementById('cfg-mult-semi').value)       || 1,
+        mult_final:                parseFloat(document.getElementById('cfg-mult-final').value)      || 1,
+        pts_bonus_artilheiro:      parseInt(document.getElementById('cfg-pts-bonus').value)         || 0,
+        bonus_artilheiro_ativo:    document.getElementById('toggle-artilheiro').classList.contains('on'),
+      };
+
+      const { error } = await db.from('boloes').update(update).eq('id', bolaoId);
+      if (error) { showToast('Erro ao salvar: ' + error.message, ''); return; }
+
+      Object.assign(bolao, update);
+      showToast('Pontuação salva! Recalculando...', 'success');
+      await recalcularTudoSilencioso();
+      showToast('Ranking atualizado! ✓', 'success');
+    }
+
+    async function recalcularTudoSilencioso() {
+      const jogosEncerrados = jogos.filter(j => j.status === 'finished');
+      for (const jogo of jogosEncerrados) {
+        await atualizarPontosPalpites(jogo.id);
+      }
+      const { error } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      if (error) console.error('[ranking] recalcular_ranking error:', error);
+    }
+
+    // Igual a calcularPontosPorJogo mas sem toast e sem chamar recalcular_ranking
+    async function atualizarPontosPalpites(jogoId) {
+      const jogo = jogos.find(j => j.id === jogoId);
+      if (!jogo || jogo.placar_home === null) return;
+
+      const { data: palpites } = await db.from('palpites').select('*').eq('jogo_id', jogoId);
+      if (!palpites?.length) return;
+
+      const mult = { round32: bolao.mult_round32, oitavas: bolao.mult_oitavas, quartas: bolao.mult_quartas, semi: bolao.mult_semi, final: bolao.mult_final, terceiro: 1 }[jogo.fase] || 1;
+      const artConfirmados = Array.isArray(jogo.artilheiro_confirmado)
+        ? jogo.artilheiro_confirmado.map(a => a.toLowerCase().trim()) : [];
+
+      for (const pal of palpites) {
+        let total = Math.round(calcPts(pal.placar_home, pal.placar_away, jogo.placar_home, jogo.placar_away) * mult);
+        if (bolao.bonus_artilheiro_ativo && artConfirmados.length && pal.artilheiro) {
+          if (artConfirmados.includes(pal.artilheiro.toLowerCase().trim())) total += bolao.pts_bonus_artilheiro;
+        }
+        await db.from('palpites').update({ pontos: total, calculado: true }).eq('id', pal.id);
+      }
+    }
+
+    const SUPABASE_FUNCTIONS_URL = 'https://depjjhmzisjmknechkcv.supabase.co/functions/v1';
+
+    async function buscarViaIA(jogoId) {
+      const jogo = jogos.find(j => j.id === jogoId);
+      if (!jogo) return;
+
+      const btn = document.getElementById(`ia-btn-${jogoId}`);
+      const textoOriginal = btn.textContent;
+      btn.textContent = '⏳';
+      btn.disabled = true;
+
+      try {
+        const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/buscar-placar`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            time_home: jogo.time_home,
+            time_away: jogo.time_away,
+            data_hora: jogo.data_hora,
+            fase: jogo.fase,
+          }),
+        });
+
+        const resultado = await resp.json();
+
+        if (resultado.erro || resultado.error) {
+          showToast('IA: ' + (resultado.erro || resultado.error), '');
+          return;
+        }
+
+        const ph = resultado.placar_home;
+        const pa = resultado.placar_away;
+        const status = resultado.status || 'finished';
+        const arts = resultado.artilheiros || [];
+        const fonte = resultado.fonte || '';
+
+        const placarTxt = ph != null && pa != null ? `${ph} × ${pa}` : 'sem placar';
+        const artTxt = arts.length ? `\nArtilheiros: ${arts.join(', ')}` : '';
+        const msg = `IA encontrou:\n${jogo.time_home} ${placarTxt} ${jogo.time_away}\nStatus: ${status}${artTxt}\nFonte: ${fonte}\n\nAplicar?`;
+
+        if (!confirm(msg)) return;
+
+        // Preenche os campos
+        if (ph != null) document.getElementById(`rh-${jogoId}`).value = ph;
+        if (pa != null) document.getElementById(`ra-${jogoId}`).value = pa;
+        document.getElementById(`st-${jogoId}`).value = status;
+
+        // Artilheiro (primeiro da lista)
+        const artSel = document.getElementById(`art-sel-${jogoId}`);
+        if (artSel && arts.length) {
+          const artNorm = arts[0].toLowerCase().trim();
+          for (const opt of artSel.options) {
+            if (opt.value.toLowerCase().trim() === artNorm) {
+              artSel.value = opt.value;
+              break;
+            }
+          }
+        }
+
+        showToast('Campos preenchidos — confira e clique Salvar ✓', 'success');
+      } catch (e) {
+        showToast('Erro ao chamar IA: ' + e.message, '');
+      } finally {
+        btn.textContent = textoOriginal;
+        btn.disabled = false;
+      }
+    }
+
+    async function toggleBloqueio() {
+      const toggle = document.getElementById('toggle-bloqueio');
+      const novo = !bolao.palpites_bloqueados;
+      await db.from('boloes').update({ palpites_bloqueados: novo }).eq('id', bolaoId);
+      bolao.palpites_bloqueados = novo;
+      toggle.classList.toggle('on', novo);
+      showToast(novo ? 'Palpites bloqueados' : 'Palpites liberados', 'success');
+    }
+
+    function copiarLink() {
+      const link = document.getElementById('link-bolao').textContent;
+      navigator.clipboard.writeText(link);
+      showToast('Link copiado!', 'success');
+    }
+
+    function confirmarEncerrar() {
+      if (confirm(`Excluir o bolão "${bolao.nome}" permanentemente?\n\nTodos os palpites e participantes serão apagados. Não há como desfazer.`)) {
+        db.from('boloes').delete().eq('id', bolaoId)
+          .then(({ error }) => {
+            if (error) { showToast('Erro ao excluir: ' + error.message, ''); return; }
+            showToast('Bolão excluído');
+            setTimeout(() => location.href = 'index.html', 1000);
+          });
+      }
+    }
+
+    function mudarAba(aba, el) {
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tabs .tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(`aba-${aba}`).classList.add('active');
+      el.classList.add('active');
+    }
+
+    init();
+  </script>
+</body>
+</html>

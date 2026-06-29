@@ -1,0 +1,1461 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bolão — Copa 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    /* Artilheiro selector */
+    .artilheiro-section {
+      padding: 8px 14px 12px;
+      border-top: 1px solid var(--glass-border);
+    }
+    .artilheiro-label {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .artilheiro-pts {
+      background: rgba(255,215,0,0.1);
+      color: var(--gold);
+      border-radius: 6px;
+      padding: 2px 7px;
+      font-size: 10px;
+      font-weight: 800;
+    }
+    .artilheiro-times {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    .artilheiro-time-label {
+      font-size: 11px;
+      color: var(--text2);
+      font-weight: 700;
+      margin-bottom: 4px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .artilheiro-select {
+      width: 100%;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      padding: 8px 10px;
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 12px;
+      font-weight: 600;
+      outline: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .artilheiro-select:focus {
+      border-color: var(--gold);
+      background: rgba(255,215,0,0.06);
+    }
+    .artilheiro-select option { background: #1a1d2e; }
+    .artilheiro-select:disabled { opacity: 0.4; cursor: not-allowed; }
+    /* Stepper de gols */
+    .gol-stepper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 2px;
+    }
+    .gol-btn {
+      width: 28px;
+      height: 22px;
+      border-radius: 7px;
+      border: 1px solid var(--glass-border);
+      background: rgba(255,255,255,0.06);
+      color: var(--text2);
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+      transition: background 0.15s;
+      font-family: var(--font);
+    }
+    .gol-btn:active { background: rgba(255,255,255,0.15); }
+    .gol-btn:disabled { opacity: 0.25; cursor: not-allowed; }
+    .gol-val {
+      font-size: 26px;
+      font-weight: 800;
+      color: var(--text);
+      min-width: 32px;
+      text-align: center;
+      line-height: 1.2;
+    }
+    .gol-val.saved { color: var(--accent2); }
+
+    /* Countdown bar */
+    .countdown-bar {
+      margin: 10px 16px 0;
+      padding: 10px 14px;
+      border-radius: 12px;
+      background: rgba(0,229,176,0.07);
+      border: 1px solid rgba(0,229,176,0.2);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .countdown-bar.urgente {
+      background: rgba(255,87,87,0.08);
+      border-color: rgba(255,87,87,0.3);
+    }
+    .countdown-bar.urgente .countdown-timer { color: #ff5757; }
+    .countdown-jogo {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      color: var(--text2);
+      font-size: 12px;
+      font-weight: 600;
+    }
+    .countdown-timer {
+      color: var(--accent2);
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+    .countdown-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text3);
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    .pix-banner {
+      margin: 12px 16px;
+      background: linear-gradient(135deg, rgba(0,200,83,0.1), rgba(0,212,170,0.1));
+      border: 1px solid rgba(0,200,83,0.25);
+      border-radius: 14px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .pix-banner-icon { font-size: 28px; flex-shrink: 0; }
+    .pix-banner-text { flex: 1; }
+    .pix-banner-title { font-size: 14px; font-weight: 700; }
+    .pix-banner-key { font-size: 13px; color: var(--accent2); margin-top: 2px; word-break: break-all; }
+    .pix-copy-btn { background: none; border: 1px solid var(--accent2); color: var(--accent2); border-radius: 8px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; font-family: var(--font); }
+
+    /* Palpite salvo indicator */
+    .palpite-status {
+      font-size: 11px;
+      color: var(--text2);
+      text-align: center;
+    }
+    .palpite-status.salvo { color: var(--success); }
+
+    /* Palpites por participante */
+    .pals-fase-titulo {
+      font-size: 10px;
+      font-weight: 800;
+      color: var(--text3);
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      padding: 12px 0 6px;
+    }
+    .pts-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--gold);
+      background: rgba(255,215,0,0.1);
+      border-radius: 6px;
+      padding: 2px 7px;
+      white-space: nowrap;
+    }
+
+    /* Rodadas tabs */
+    .rodadas-section { padding: 16px; }
+
+    /* Ranking tab */
+    .ranking-header {
+      background: var(--bg2);
+      border-bottom: 1px solid var(--border);
+      padding: 12px 16px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    /* Palpites dos outros */
+    .outros-palpites-modal .modal { max-height: 80vh; overflow-y: auto; }
+    .outros-palpite-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+    .outros-palpite-row:last-child { border-bottom: none; }
+    .outros-nome { font-size: 14px; font-weight: 600; }
+    .outros-placar { font-size: 16px; font-weight: 800; color: var(--accent2); }
+
+    .btn-ver-palpites {
+      background: none;
+      border: none;
+      font-size: 12px;
+      color: var(--text2);
+      cursor: pointer;
+      font-family: var(--font);
+      text-decoration: underline;
+    }
+
+    .valor-total-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(255,215,0,0.1);
+      border: 1px solid rgba(255,215,0,0.25);
+      border-radius: 20px;
+      padding: 4px 12px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--gold);
+    }
+
+    .share-btn {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 10px 14px;
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: var(--font);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      width: 100%;
+      justify-content: center;
+    }
+    .share-btn:active { background: var(--border); }
+    .share-btn.bracket {
+      border-color: rgba(124,107,255,0.4);
+      color: var(--accent);
+    }
+
+    /* Times simulados via palpites do usuário */
+    .sim-team { color: var(--accent); font-style: italic; }
+    .sim-team-contexto {
+      font-size: 10px;
+      color: var(--text3);
+      text-align: center;
+      margin-top: 3px;
+      font-style: italic;
+      line-height: 1.3;
+    }
+    .sim-bloqueado-hint {
+      font-size: 11px;
+      color: var(--text3);
+      font-style: italic;
+    }
+
+    body { padding-bottom: 72px; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="header-back" onclick="location.href='index.html'">‹</button>
+    <span id="header-nome" style="font-weight:700;font-size:16px">Bolão</span>
+    <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="btn btn-secondary btn-sm">⚙️ Admin</button>
+  </div>
+
+  <!-- Hero com capa -->
+  <div class="bolao-hero" id="hero">
+    <div class="bolao-hero-bg"></div>
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="bolao-hero-overlay"></div>
+    <div class="bolao-hero-info">
+      <div class="bolao-nome" id="bolao-nome">Carregando...</div>
+      <div class="bolao-meta">
+        <span id="bolao-participantes">— participantes</span>
+        <span id="valor-total-meta"></span>
+        <span id="minha-posicao" style="display:none;background:rgba(255,215,0,0.15);color:var(--gold);border-radius:20px;padding:2px 10px;font-weight:800;font-size:12px"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Countdown próximo jogo -->
+  <div id="countdown-bar" class="countdown-bar" style="display:none">
+    <span style="font-size:18px">⏱</span>
+    <span class="countdown-jogo" id="countdown-jogo"></span>
+    <div style="text-align:right">
+      <div class="countdown-timer" id="countdown-timer"></div>
+      <div class="countdown-label">para fechar</div>
+    </div>
+  </div>
+
+  <!-- Banner Pix (se não pagou) -->
+  <div id="pix-banner" style="display:none" class="pix-banner">
+    <div class="pix-banner-icon">💸</div>
+    <div class="pix-banner-text">
+      <div class="pix-banner-title">Pagamento pendente</div>
+      <div class="pix-banner-key" id="pix-chave">—</div>
+    </div>
+    <button class="pix-copy-btn" onclick="copiarPix()">Copiar</button>
+  </div>
+
+  <!-- Premiação -->
+  <div class="premiacao-card" id="premiacao-card">
+    <div class="premiacao-valor" id="premiacao-valor">R$ 0,00</div>
+    <div class="premiacao-label">💰 Prêmio total em jogo</div>
+  </div>
+
+  <!-- Botões de compartilhamento -->
+  <div style="padding: 0 16px 8px; display:grid; grid-template-columns:1fr 1fr; gap:8px">
+    <button class="share-btn" onclick="compartilhar()">
+      🔗 Compartilhar bolão
+    </button>
+    <button class="share-btn bracket" onclick="compartilharBracket()">
+      📊 Meu bracket
+    </button>
+  </div>
+
+  <!-- Trash Talk Banner — visível em todas as abas -->
+  <div id="trash-banner" style="display:none;margin:0 16px 8px;border-radius:14px;border:1px solid rgba(0,229,176,0.3);background:linear-gradient(135deg,rgba(0,229,176,0.05),rgba(108,99,255,0.07));padding:12px 16px">
+    <div style="font-size:10px;font-weight:800;color:var(--accent2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">🔥 Destaque da rodada</div>
+    <div id="trash-banner-nome" style="font-size:13px;font-weight:700;color:var(--text1)"></div>
+    <div id="trash-banner-msg" style="font-size:14px;color:var(--accent2);font-style:italic;margin-top:4px"></div>
+    <div id="trash-banner-edit" style="display:none;margin-top:8px">
+      <button id="trash-banner-btn" onclick="editarTrashTalk()" style="font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--accent2);background:rgba(0,229,176,0.1);color:var(--accent2);cursor:pointer;font-family:var(--font);font-weight:700"></button>
+    </div>
+  </div>
+
+  <!-- Tabs principais -->
+  <div class="tabs-scroll">
+    <div class="tabs">
+      <button class="tab active" onclick="mudarAba('jogos',this)">⚽ Palpites</button>
+      <button class="tab" onclick="mudarAba('ranking',this)">🏆 Ranking</button>
+      <button class="tab" onclick="mudarAba('chaveamento',this)">📊 Chaveamento</button>
+      <button class="tab" onclick="mudarAba('regras',this)">📋 Regras</button>
+    </div>
+  </div>
+
+  <!-- ABA: JOGOS / PALPITES -->
+  <div id="aba-jogos" class="tab-content active">
+    <!-- Sub-tabs de rodadas -->
+    <div class="tabs-scroll" id="rodadas-tabs" style="top:107px">
+      <div class="tabs" id="rodadas-tabs-inner"></div>
+    </div>
+    <div id="jogos-content">
+      <div class="loading-full"><div class="spinner"></div>Carregando jogos...</div>
+    </div>
+  </div>
+
+  <!-- ABA: RANKING -->
+  <div id="aba-ranking" class="tab-content">
+    <div id="ranking-content">
+      <div class="loading-full"><div class="spinner"></div>Carregando ranking...</div>
+    </div>
+  </div>
+
+  <!-- ABA: CHAVEAMENTO -->
+  <div id="aba-chaveamento" class="tab-content">
+    <div id="chaveamento-content">
+      <div class="loading-full"><div class="spinner"></div>Carregando chaveamento...</div>
+    </div>
+  </div>
+
+  <!-- ABA: REGRAS -->
+  <div id="aba-regras" class="tab-content">
+    <div id="regras-content" style="padding:16px"></div>
+  </div>
+
+  <!-- Modal: ver palpites dos outros -->
+  <div class="modal-overlay outros-palpites-modal" id="modal-outros" onclick="fecharModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+      <div class="modal-handle"></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:0 4px 4px">
+        <div class="modal-title" id="modal-titulo" style="margin:0">Palpites do grupo</div>
+        <button onclick="fecharModal()" style="background:none;border:none;color:var(--text2);font-size:22px;cursor:pointer;line-height:1;padding:0 4px">×</button>
+      </div>
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/elencos.js"></script>
+  <script src="js/fotos.js"></script>
+  <script src="js/campinho.js"></script>
+  <script>
+    const params = new URLSearchParams(location.search);
+    const bolaoId = params.get('id');
+    let bolao = null;
+    let currentUser = null;
+    let participante = null;
+    let jogos = [];
+    let palpites = {};
+    let simulacao = {};
+    let todosParticipantes = [];
+    let todosPalpites = [];
+    const FASES = ['round32','oitavas','quartas','semi','final'];
+    let faseAtiva = 'round32';
+    let abaAtiva = 'jogos';
+    let artilheirosSelecionados = {};
+
+    async function init() {
+      if (!bolaoId) { location.href = 'index.html'; return; }
+      currentUser = await getUser();
+      if (!currentUser) {
+        localStorage.setItem('bolao_redirect', location.href);
+        location.href = 'index.html';
+        return;
+      }
+
+      await carregarBolao();
+      await carregarParticipante();
+      await carregarJogos();
+      await carregarPalpites();
+      await carregarRanking();
+      renderJogos();
+      renderRodadasTabs();
+      iniciarCountdown();
+      iniciarPolling();
+    }
+
+    async function carregarBolao() {
+      const { data } = await db.from('boloes').select('*').eq('id', bolaoId).single();
+      bolao = data;
+      document.getElementById('bolao-nome').textContent = bolao.nome;
+      document.getElementById('header-nome').textContent = bolao.nome;
+      if (bolao.admin_id === currentUser.id) {
+        document.getElementById('admin-btn').style.display = 'block';
+      }
+    }
+
+    async function carregarParticipante() {
+      const { data } = await db.from('participantes')
+        .select('*').eq('bolao_id', bolaoId).eq('user_id', currentUser.id).single();
+
+      if (!data) {
+        const { data: novo } = await db.from('participantes').insert({
+          bolao_id: bolaoId,
+          user_id: currentUser.id,
+          nome: currentUser.user_metadata?.nome || currentUser.email.split('@')[0],
+          pagamento_confirmado: false
+        }).select().single();
+        participante = novo;
+      } else {
+        participante = data;
+      }
+
+      if (!participante.pagamento_confirmado && bolao.admin_id !== currentUser.id && bolao.chave_pix) {
+        document.getElementById('pix-banner').style.display = 'flex';
+        document.getElementById('pix-chave').textContent = bolao.chave_pix;
+      }
+    }
+
+    async function carregarJogos() {
+      const { data } = await db.from('jogos').select('*').order('fase').order('data_hora', { nullsFirst: false });
+      jogos = data || [];
+    }
+
+    async function carregarPalpites() {
+      if (!participante) return;
+      const { data } = await db.from('palpites')
+        .select('*').eq('participante_id', participante.id);
+      palpites = {};
+      artilheirosSelecionados = {};
+      (data || []).forEach(p => {
+        palpites[p.jogo_id] = p;
+        if (p.artilheiro) artilheirosSelecionados[p.jogo_id] = p.artilheiro;
+      });
+
+      const { data: todos } = await db.from('palpites')
+        .select('*, participantes(nome)')
+        .eq('bolao_id', bolaoId);
+      todosPalpites = todos || [];
+
+      const { data: parts } = await db.from('participantes')
+        .select('*').eq('bolao_id', bolaoId);
+      todosParticipantes = parts || [];
+
+      const pagos = todosParticipantes.filter(p => p.pagamento_confirmado).length;
+      document.getElementById('bolao-participantes').textContent =
+        `${todosParticipantes.length} participantes`;
+      const premio = pagos * (bolao.valor_entrada || 0);
+      document.getElementById('premiacao-valor').textContent = formatMoeda(premio);
+      document.getElementById('valor-total-meta').textContent = formatMoeda(premio) + ' em jogo';
+
+      // Recalcula simulação sempre que os palpites mudam
+      simulacao = construirSimulacao();
+      renderTrashBanner();
+    }
+
+    // ─── SIMULAÇÃO ─────────────────────────────────────────────────────────────
+    // Propaga vencedores previstos pelo usuário fase a fase.
+    // Só substitui slots realmente "A definir" no banco — nunca sobrescreve times confirmados.
+    function construirSimulacao() {
+      const sim = {};
+      for (const jogo of jogos) {
+        sim[jogo.id] = {
+          home: jogo.time_home,
+          homeFlag: jogo.time_home_flag || '🛡️',
+          homeSimulado: false,
+          homeContexto: null,
+          away: jogo.time_away,
+          awayFlag: jogo.time_away_flag || '🛡️',
+          awaySimulado: false,
+          awayContexto: null,
+        };
+      }
+
+      // 1ª passada: labels de contexto para slots ainda indefinidos
+      for (const jogo of jogos) {
+        if (!jogo.proximo_jogo_id) continue;
+        const next = sim[jogo.proximo_jogo_id];
+        if (!next) continue;
+        const label = `Venc. ${nomeFase(jogo.fase)} J${jogo.rodada_num}`;
+        if (jogo.proximo_posicao === 'home' && next.home === 'A definir' && !next.homeContexto) {
+          next.homeContexto = label;
+        } else if (jogo.proximo_posicao === 'away' && next.away === 'A definir' && !next.awayContexto) {
+          next.awayContexto = label;
+        }
+      }
+
+      // 2ª passada: propaga vencedores simulados em ordem de fase
+      const faseOrder = ['round32', 'oitavas', 'quartas', 'semi', 'final'];
+      for (const fase of faseOrder) {
+        const jogosFase = jogos
+          .filter(j => j.fase === fase)
+          .sort((a, b) => a.rodada_num - b.rodada_num);
+
+        for (const jogo of jogosFase) {
+          if (!jogo.proximo_jogo_id) continue;
+          const pal = palpites[jogo.id];
+          if (!pal || pal.placar_home == null || pal.placar_away == null) continue;
+          if (pal.placar_home === pal.placar_away) continue; // empate → sem vencedor simulado
+
+          const s = sim[jogo.id];
+          const vencedor = pal.placar_home > pal.placar_away ? 'home' : 'away';
+          const winnerNome = vencedor === 'home' ? s.home : s.away;
+          const winnerFlag = vencedor === 'home' ? s.homeFlag : s.awayFlag;
+          if (winnerNome === 'A definir') continue;
+
+          const nextJogo = jogos.find(j => j.id === jogo.proximo_jogo_id);
+          if (!nextJogo) continue;
+          const nextSim = sim[jogo.proximo_jogo_id];
+
+          if (jogo.proximo_posicao === 'home' && nextJogo.time_home === 'A definir') {
+            nextSim.home = winnerNome;
+            nextSim.homeFlag = winnerFlag;
+            nextSim.homeSimulado = true;
+            nextSim.homeContexto = null;
+          } else if (jogo.proximo_posicao === 'away' && nextJogo.time_away === 'A definir') {
+            nextSim.away = winnerNome;
+            nextSim.awayFlag = winnerFlag;
+            nextSim.awaySimulado = true;
+            nextSim.awayContexto = null;
+          }
+        }
+      }
+
+      return sim;
+    }
+
+    // ─── RENDER ────────────────────────────────────────────────────────────────
+
+    function renderRodadasTabs() {
+      const fasesComJogos = FASES.filter(f => jogos.some(j => j.fase === f));
+      const inner = document.getElementById('rodadas-tabs-inner');
+      inner.innerHTML = fasesComJogos.map(f => `
+        <button class="tab ${f === faseAtiva ? 'active' : ''}"
+          onclick="mudarFase('${f}',this)">${nomeFase(f)}</button>`).join('');
+    }
+
+    function mudarFase(fase, el) {
+      faseAtiva = fase;
+      document.querySelectorAll('#rodadas-tabs-inner .tab').forEach(t => t.classList.remove('active'));
+      el.classList.add('active');
+      renderJogos();
+    }
+
+    function jogoAberto(jogo) {
+      if (jogo.override_aberto) return true;
+      if (!jogo.data_hora) return true;
+      return new Date(jogo.data_hora) > new Date(Date.now() + 5 * 60 * 1000);
+    }
+
+    function calcPts(ph, pa, rh, ra, b) {
+      if (ph === rh && pa === ra) return b.pts_placar_exato;
+      const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
+      const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
+      if (vp === vr) {
+        if (ph === rh || pa === ra) return b.pts_vencedor_mais_um_time;
+        return b.pts_vencedor_correto;
+      }
+      if (ph === rh || pa === ra) return b.pts_gols_um_time;
+      return 0;
+    }
+
+    function getMult(fase, b) {
+      const map = { round32: b.mult_round32, oitavas: b.mult_oitavas, quartas: b.mult_quartas, semi: b.mult_semi, final: b.mult_final, terceiro: 1 };
+      return map[fase] || 1;
+    }
+
+    function badgePontos(pts, mult) {
+      if (pts === null) return '';
+      const total = Math.round(pts * mult);
+      if (pts === bolao.pts_placar_exato) return `<span class="jogo-pontos-badge pontos-exato">+${total} pts 🎯</span>`;
+      if (pts === bolao.pts_vencedor_mais_um_time) return `<span class="jogo-pontos-badge pontos-vencedor-gol">+${total} pts ✅</span>`;
+      if (pts === bolao.pts_vencedor_correto) return `<span class="jogo-pontos-badge pontos-vencedor">+${total} pts 👍</span>`;
+      if (pts === bolao.pts_gols_um_time) return `<span class="jogo-pontos-badge pontos-gol">+${total} pts ⚽</span>`;
+      return `<span class="jogo-pontos-badge pontos-zero">0 pts</span>`;
+    }
+
+    function renderJogos() {
+      const content = document.getElementById('jogos-content');
+      const jogosFase = jogos.filter(j => j.fase === faseAtiva);
+
+      if (!jogosFase.length) {
+        content.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🗓️</div><div class="empty-state-title">Jogos a definir</div><div class="empty-state-desc">Os confrontos desta fase serão definidos após a rodada anterior.</div></div>`;
+        return;
+      }
+
+      content.innerHTML = jogosFase.map(jogo => {
+        const pal = palpites[jogo.id];
+        const aberto = jogoAberto(jogo);
+        const isLive = jogo.status === 'live';
+        const finished = jogo.status === 'finished';
+        const mult = getMult(jogo.fase, bolao);
+
+        // Times via simulação (propaga palpites anteriores)
+        const s = simulacao[jogo.id] || {};
+        const homeNome  = s.home     || jogo.time_home;
+        const homeFlag  = s.homeFlag || jogo.time_home_flag || '🛡️';
+        const homeSim   = !!s.homeSimulado;
+        const homeCtx   = s.homeContexto || null;
+        const awayNome  = s.away     || jogo.time_away;
+        const awayFlag  = s.awayFlag || jogo.time_away_flag || '🛡️';
+        const awaySim   = !!s.awaySimulado;
+        const awayCtx   = s.awayContexto || null;
+
+        // Palpite só é liberado quando AMBOS os times são conhecidos (reais ou simulados)
+        const teamsKnown = homeNome !== 'A definir' && awayNome !== 'A definir';
+        const palpitesBloqueados = !aberto || bolao.palpites_bloqueados || !teamsKnown;
+
+        let pontosHTML = '';
+        if (pal && finished) {
+          const pts = calcPts(pal.placar_home, pal.placar_away, jogo.placar_home, jogo.placar_away, bolao);
+          pontosHTML = badgePontos(pts, mult);
+        }
+
+        // Artilheiro usa os nomes simulados para buscar elencos
+        const artilheiroAtivo = bolao.bonus_artilheiro_ativo;
+        const jogadoresHome = getJogadoresComPosicao(homeNome);
+        const jogadoresAway = getJogadoresComPosicao(awayNome);
+        const temElencos = jogadoresHome.length > 0 || jogadoresAway.length > 0;
+        const artilheiroSalvo = pal?.artilheiro || '';
+
+        const _jogoId = jogo.id;
+        const artilheiroHTML = artilheiroAtivo && !finished && temElencos && !palpitesBloqueados ? `
+          <div class="artilheiro-section">
+            <div class="artilheiro-label" onclick="toggleCampinho('${_jogoId}')" style="cursor:pointer">
+              ⚽ Quem vai marcar?
+              <span class="artilheiro-pts">+${bolao.pts_bonus_artilheiro} pts</span>
+              <span id="cpn-sel-${_jogoId}" style="margin-left:auto;color:var(--gold);font-size:11px;font-weight:700">${artilheiroSalvo ? '✓ ' + artilheiroSalvo : 'escolher ▼'}</span>
+            </div>
+            <div id="cpn-wrap-${_jogoId}" data-home="${homeNome}" data-away="${awayNome}" style="display:none;margin-top:4px">
+              ${campinhoRender(_jogoId, homeNome, awayNome, artilheiroSalvo, (nome) => {
+                artilheirosSelecionados[_jogoId] = nome;
+                salvarArtilheiro(_jogoId, nome);
+                const lbl = document.getElementById('cpn-sel-' + _jogoId);
+                if (lbl) lbl.textContent = nome ? '✓ ' + nome : 'escolher ▼';
+                if (nome) {
+                  const wrap = document.getElementById('cpn-wrap-' + _jogoId);
+                  if (wrap) wrap.style.display = 'none';
+                }
+              })}
+            </div>
+          </div>` : artilheiroAtivo && (finished || palpitesBloqueados) && artilheiroSalvo ? `
+          <div style="padding:6px 14px 10px;font-size:12px;color:var(--text2)">
+            ⚽ Marcador: <strong style="color:var(--text)">${artilheiroSalvo}</strong>
+          </div>` : '';
+
+        // Hint do footer
+        let footerHint;
+        if (pontosHTML) {
+          footerHint = pontosHTML;
+        } else if (!teamsKnown) {
+          footerHint = `<span class="sim-bloqueado-hint">🔮 Palpite na fase anterior para liberar</span>`;
+        } else if (pal && !finished) {
+          footerHint = `<span class="palpite-hint salvo">✓ Palpite salvo</span>`;
+        } else if (palpitesBloqueados) {
+          footerHint = `<span class="palpite-hint locked">🔒 Encerrado para palpites</span>`;
+        } else {
+          footerHint = `<span class="palpite-hint">Toque nos números para palpitar</span>`;
+        }
+
+        return `
+        <div class="jogo-card ${isLive ? 'live' : ''} ${finished ? 'finished' : ''}" id="jogo-${jogo.id}">
+          <div class="jogo-header">
+            <span>${formatData(jogo.data_hora)}</span>
+            <span>${isLive
+              ? '<span class="badge-live"><span class="dot"></span>AO VIVO</span>'
+              : finished ? '✅ Encerrado'
+              : `<span class="badge-mult">${mult}x pts</span>`}</span>
+          </div>
+          <div class="jogo-times">
+            <div class="jogo-time">
+              <div class="jogo-time-flag">${homeFlag}</div>
+              <div class="jogo-time-nome${homeSim ? ' sim-team' : ''}">${homeNome}</div>
+              ${homeCtx ? `<div class="sim-team-contexto">${homeCtx}</div>` : ''}
+            </div>
+            <div class="jogo-center">
+              <span class="jogo-vs">VS</span>
+              ${finished || isLive
+                ? `<div class="jogo-placar-real">
+                     <span class="placar-num">${jogo.placar_home ?? '—'}</span>
+                     <span class="placar-sep">×</span>
+                     <span class="placar-num">${jogo.placar_away ?? '—'}</span>
+                   </div>`
+                : `<div class="palpite-inputs">
+                     <div class="gol-stepper">
+                       <button class="gol-btn" ${palpitesBloqueados ? 'disabled' : ''} onclick="ajustarGol('${jogo.id}','home',1)">+</button>
+                       <span id="ph-${jogo.id}" class="gol-val${pal ? ' saved' : ''}">${pal ? pal.placar_home : 0}</span>
+                       <button class="gol-btn" ${palpitesBloqueados ? 'disabled' : ''} onclick="ajustarGol('${jogo.id}','home',-1)">−</button>
+                     </div>
+                     <span class="placar-sep">×</span>
+                     <div class="gol-stepper">
+                       <button class="gol-btn" ${palpitesBloqueados ? 'disabled' : ''} onclick="ajustarGol('${jogo.id}','away',1)">+</button>
+                       <span id="pa-${jogo.id}" class="gol-val${pal ? ' saved' : ''}">${pal ? pal.placar_away : 0}</span>
+                       <button class="gol-btn" ${palpitesBloqueados ? 'disabled' : ''} onclick="ajustarGol('${jogo.id}','away',-1)">−</button>
+                     </div>
+                   </div>`
+              }
+            </div>
+            <div class="jogo-time">
+              <div class="jogo-time-flag">${awayFlag}</div>
+              <div class="jogo-time-nome${awaySim ? ' sim-team' : ''}">${awayNome}</div>
+              ${awayCtx ? `<div class="sim-team-contexto">${awayCtx}</div>` : ''}
+            </div>
+          </div>
+          ${artilheiroHTML}
+          <div class="jogo-footer">
+            <div>${footerHint}</div>
+            ${!aberto || finished ? `<button class="btn-ver-palpites" onclick="verPalpites('${jogo.id}')">ver todos</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    function renderChaveamento() {
+      const content = document.getElementById('chaveamento-content');
+      const fases = ['round32','oitavas','quartas','semi','final'];
+
+      content.innerHTML = `
+        <div style="padding:12px 16px 4px;font-size:13px;color:var(--text2)">
+          Seu bracket com palpites — <span style="color:var(--accent)">🔮 = previsão sua</span>
+        </div>
+        ${fases.map(fase => {
+          const js = jogos.filter(j => j.fase === fase).sort((a,b) => a.rodada_num - b.rodada_num);
+          if (!js.length) return '';
+          return `
+            <div style="padding:8px 16px 0">
+              <div class="section-title">${nomeFase(fase)}</div>
+            </div>
+            ${js.map(jogo => {
+              const s = simulacao[jogo.id] || {};
+              const pal = palpites[jogo.id];
+              const hNome = s.home || jogo.time_home;
+              const hFlag = s.homeFlag || jogo.time_home_flag || '🛡️';
+              const hSim  = !!s.homeSimulado;
+              const aNome = s.away || jogo.time_away;
+              const aFlag = s.awayFlag || jogo.time_away_flag || '🛡️';
+              const aSim  = !!s.awaySimulado;
+              const finished = jogo.status === 'finished';
+              const live = jogo.status === 'live';
+
+              const palPh = pal?.placar_home ?? null;
+              const palPa = pal?.placar_away ?? null;
+              const realPh = (finished || live) ? (jogo.placar_home ?? '?') : null;
+              const realPa = (finished || live) ? (jogo.placar_away ?? '?') : null;
+
+              return `
+                <div style="margin:6px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:12px;overflow:hidden">
+                  <div style="padding:5px 12px;background:var(--bg3);font-size:11px;color:var(--text2);display:flex;justify-content:space-between;align-items:center">
+                    <span>${formatData(jogo.data_hora)}</span>
+                    ${finished ? '<span style="color:var(--success)">✅ Encerrado</span>' : live ? '<span style="color:#ff6b6b">● AO VIVO</span>' : ''}
+                  </div>
+                  <div style="padding:10px 12px">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+                      <span style="font-size:20px">${hFlag}</span>
+                      <span style="font-weight:600;flex:1;${hSim ? 'color:var(--accent);font-style:italic' : ''}">${hSim ? '🔮 ' : ''}${hNome}</span>
+                      <div style="text-align:right;min-width:36px">
+                        ${realPh !== null ? `<div style="font-size:18px;font-weight:800">${realPh}</div>` : ''}
+                        ${palPh !== null ? `<div style="font-size:${realPh !== null ? 11 : 16}px;color:var(--accent2);font-weight:700">${realPh !== null ? `(seu: ${palPh})` : palPh}</div>` : ''}
+                      </div>
+                    </div>
+                    <div style="display:flex;align-items:center;gap:8px">
+                      <span style="font-size:20px">${aFlag}</span>
+                      <span style="font-weight:600;flex:1;${aSim ? 'color:var(--accent);font-style:italic' : ''}">${aSim ? '🔮 ' : ''}${aNome}</span>
+                      <div style="text-align:right;min-width:36px">
+                        ${realPa !== null ? `<div style="font-size:18px;font-weight:800">${realPa}</div>` : ''}
+                        ${palPa !== null ? `<div style="font-size:${realPa !== null ? 11 : 16}px;color:var(--accent2);font-weight:700">${realPa !== null ? `(seu: ${palPa})` : palPa}</div>` : ''}
+                      </div>
+                    </div>
+                  </div>
+                </div>`;
+            }).join('')}`;
+        }).join('')}`;
+    }
+
+    // ─── AÇÕES ─────────────────────────────────────────────────────────────────
+
+    function getArtilheiroSelecionado(jogoId) {
+      return artilheirosSelecionados[jogoId] ?? palpites[jogoId]?.artilheiro ?? null;
+    }
+
+    async function salvarArtilheiro(jogoId, artilheiro) {
+      const pal = palpites[jogoId];
+      if (!pal) {
+        showToast('Salve o placar antes de escolher um goleador', 'error');
+        return;
+      }
+      const { error } = await db.from('palpites')
+        .update({ artilheiro: artilheiro || null })
+        .eq('participante_id', participante.id)
+        .eq('jogo_id', jogoId);
+      if (!error) {
+        palpites[jogoId] = { ...pal, artilheiro };
+        artilheirosSelecionados[jogoId] = artilheiro;
+        showToast(artilheiro ? `⚽ ${artilheiro} escolhido!` : 'Escolha removida', 'success');
+      }
+    }
+
+    function toggleCampinho(jogoId) {
+      const wrap = document.getElementById(`cpn-wrap-${jogoId}`);
+      if (!wrap) return;
+      const opening = wrap.style.display === 'none';
+      wrap.style.display = opening ? 'block' : 'none';
+      if (opening && typeof precarregarFotos === 'function' && typeof ELENCOS !== 'undefined') {
+        const home = wrap.dataset.home;
+        const away = wrap.dataset.away;
+        const eh = ELENCOS[home] || {};
+        const ea = ELENCOS[away] || {};
+        const nomes = [...(eh.GK||[]),...(eh.DEF||[]),...(eh.MID||[]),...(eh.FWD||[]),
+                       ...(ea.GK||[]),...(ea.DEF||[]),...(ea.MID||[]),...(ea.FWD||[])];
+        precarregarFotos(nomes);
+      }
+    }
+
+    function ajustarGol(jogoId, lado, delta) {
+      const id = lado === 'home' ? `ph-${jogoId}` : `pa-${jogoId}`;
+      const el = document.getElementById(id);
+      if (!el) return;
+      const atual = parseInt(el.textContent) || 0;
+      const novo = Math.max(0, atual + delta);
+      el.textContent = novo;
+      salvarPalpite(jogoId);
+    }
+
+    async function salvarPalpite(jogoId) {
+      const phEl = document.getElementById(`ph-${jogoId}`);
+      const paEl = document.getElementById(`pa-${jogoId}`);
+      if (!phEl || !paEl) return;
+      const ph = phEl.textContent.trim();
+      const pa = paEl.textContent.trim();
+      if (ph === '' || pa === '') return;
+
+      const artilheiro = getArtilheiroSelecionado(jogoId);
+
+      const dados = {
+        participante_id: participante.id,
+        jogo_id: jogoId,
+        bolao_id: bolaoId,
+        placar_home: parseInt(ph),
+        placar_away: parseInt(pa),
+        artilheiro: artilheiro || null
+      };
+
+      const { error } = await db.from('palpites').upsert(dados, { onConflict: 'participante_id,jogo_id' });
+      if (!error) {
+        palpites[jogoId] = dados;
+        phEl.classList.add('saved');
+        paEl.classList.add('saved');
+        simulacao = construirSimulacao();
+        renderJogos();
+        showToast('Palpite salvo!', 'success');
+      }
+    }
+
+    async function carregarRanking() {
+      const { data } = await db.from('participantes')
+        .select('*').eq('bolao_id', bolaoId).order('pontos_total', { ascending: false });
+      todosParticipantes = data || [];
+      renderRanking();
+      renderTrashBanner();
+    }
+
+    async function atualizarRanking() {
+      const btn = document.getElementById('btn-atualizar-ranking');
+      if (btn) { btn.textContent = 'Calculando...'; btn.disabled = true; }
+      await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      await carregarRanking();
+      showToast('Ranking atualizado! ✓', 'success');
+    }
+
+    function renderTrashBanner() {
+      const banner = document.getElementById('trash-banner');
+      if (!banner || !jogos.length || !todosPalpites.length || !todosParticipantes.length) return;
+
+      const ultimoJogo = jogos
+        .filter(j => j.status === 'finished' && j.placar_home !== null)
+        .sort((a, b) => new Date(b.data_hora) - new Date(a.data_hora))[0];
+      if (!ultimoJogo) return;
+
+      const acertadores = new Set(
+        todosPalpites.filter(p => p.jogo_id === ultimoJogo.id && p.pontos > 0).map(p => p.participante_id)
+      );
+      if (!acertadores.size) return;
+
+      // Pega o melhor colocado que acertou
+      const vencedor = todosParticipantes.find(p => acertadores.has(p.id));
+      if (!vencedor) return;
+
+      const pos = vencedor.posicao || (todosParticipantes.findIndex(p => p.id === vencedor.id) + 1);
+      const posStr = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
+      const isMe = vencedor.user_id === currentUser?.id;
+
+      document.getElementById('trash-banner-nome').textContent =
+        `${posStr} ${vencedor.nome} — ${vencedor.pontos_total} pts`;
+
+      const msgEl = document.getElementById('trash-banner-msg');
+      if (vencedor.trash_talk) {
+        msgEl.textContent = `"${vencedor.trash_talk}"`;
+        msgEl.style.color = 'var(--accent2)';
+      } else if (isMe) {
+        msgEl.textContent = 'Você acertou! Manda um recado para o grupo →';
+        msgEl.style.color = 'var(--text2)';
+      } else {
+        msgEl.textContent = '';
+      }
+
+      const editEl = document.getElementById('trash-banner-edit');
+      if (isMe && podeTrashTalk()) {
+        editEl.style.display = 'block';
+        document.getElementById('trash-banner-btn').textContent =
+          vencedor.trash_talk ? '✏️ Editar recado' : '✏️ Escrever recado';
+      } else {
+        editEl.style.display = 'none';
+      }
+
+      banner.style.display = 'block';
+    }
+
+    function compartilharRanking() {
+      let posAtual = 1;
+      const medalhas = ['🥇', '🥈', '🥉'];
+      const linhas = todosParticipantes.slice(0, 10).map((p, i) => {
+        if (i > 0 && p.pontos_total < todosParticipantes[i - 1].pontos_total) posAtual = i + 1;
+        const pos = medalhas[posAtual - 1] || `${posAtual}º`;
+        const trash = p.trash_talk ? ` — "${p.trash_talk}"` : '';
+        return `${pos} ${p.nome} ${p.pontos_total}pts${trash}`;
+      });
+      const texto = `🏆 Bolão Copa 2026 — Ranking\n${linhas.join('\n')}\n\n${location.href}`;
+
+      if (navigator.share) {
+        navigator.share({ title: 'Bolão Copa 2026', text: texto }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(texto).then(() => {
+          showToast('Ranking copiado! Cole no WhatsApp 📋', 'success');
+        });
+      }
+    }
+
+    function compartilharRegras() {
+      if (!bolao) return;
+      const b = bolao;
+      const mult = (f) => b[`mult_${f}`] != null ? `${b[`mult_${f}`]}×` : '—';
+      const linhas = [
+        `📋 Regras do Bolão — ${b.nome}`,
+        '',
+        `🎯 Placar exato: ${b.pts_placar_exato} pts`,
+        `⭐ Vencedor + 1 placar: ${b.pts_vencedor_mais_um_time} pts`,
+        `✅ Vencedor correto: ${b.pts_vencedor_correto} pts`,
+        `🔸 1 placar acertado: ${b.pts_gols_um_time} pts`,
+        '',
+        `Multiplicadores por fase:`,
+        `R32 ${mult('round32')} · Oitavas ${mult('oitavas')} · Quartas ${mult('quartas')} · Semis ${mult('semi')} · Final ${mult('final')}`,
+      ];
+      if (b.bonus_artilheiro_ativo) {
+        linhas.push('', `⚽ Bônus goleador: +${b.pts_bonus_artilheiro} pts por acerto`);
+      }
+      linhas.push('', location.href);
+      const texto = linhas.join('\n');
+
+      if (navigator.share) {
+        navigator.share({ title: `Regras — ${b.nome}`, text: texto }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(texto).then(() => {
+          showToast('Regras copiadas! Cole no WhatsApp 📋', 'success');
+        });
+      }
+    }
+
+    function podeTrashTalk() {
+      if (!participante || !jogos.length) return false;
+      const ultimoJogo = jogos
+        .filter(j => j.status === 'finished' && j.placar_home !== null)
+        .sort((a, b) => new Date(b.data_hora) - new Date(a.data_hora))[0];
+      if (!ultimoJogo) return false;
+      const meuPalpite = palpites[ultimoJogo.id];
+      return meuPalpite && meuPalpite.pontos > 0;
+    }
+
+    async function editarTrashTalk() {
+      const atual = participante?.trash_talk || '';
+      const novo = prompt('Sua mensagem de trash talk (máx 80 chars):\n(deixe vazio para remover)', atual);
+      if (novo === null) return;
+      const texto = novo.trim().slice(0, 80) || null;
+      const { error } = await db.from('participantes')
+        .update({ trash_talk: texto }).eq('id', participante.id);
+      if (error) { showToast('Erro ao salvar: ' + error.message, ''); return; }
+      participante.trash_talk = texto;
+      const idx = todosParticipantes.findIndex(p => p.id === participante.id);
+      if (idx >= 0) todosParticipantes[idx].trash_talk = texto;
+      renderRanking();
+      renderTrashBanner();
+      showToast(texto ? 'Trash talk salvo! 🔥' : 'Trash talk removido', 'success');
+    }
+
+    function renderRanking() {
+      const content = document.getElementById('ranking-content');
+      if (!todosParticipantes.length) {
+        content.innerHTML = '<div class="empty-state"><div class="empty-state-icon">🏆</div><div class="empty-state-title">Ranking vazio</div></div>';
+        return;
+      }
+
+      const pagos = todosParticipantes.filter(p => p.pagamento_confirmado).length;
+      const premio = pagos * (bolao?.valor_entrada || 0);
+
+      // Dense rank: empate compartilha a mesma posição
+      let posAtual = 1;
+      const posicoes = todosParticipantes.map((p, i) => {
+        if (i > 0 && p.pontos_total < todosParticipantes[i - 1].pontos_total) posAtual = i + 1;
+        return posAtual;
+      });
+
+      // Atualizar badge de posição no hero
+      const meIdx = todosParticipantes.findIndex(p => p.user_id === currentUser.id);
+      const badgeEl = document.getElementById('minha-posicao');
+      if (meIdx >= 0 && badgeEl) {
+        const meuPos = posicoes[meIdx];
+        const sufixo = meuPos === 1 ? '1º' : meuPos === 2 ? '2º' : meuPos === 3 ? '3º' : `${meuPos}º`;
+        badgeEl.textContent = `${sufixo} lugar`;
+        badgeEl.style.display = 'inline';
+      }
+
+      content.innerHTML = `
+        <div style="padding:12px 16px 4px;display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:13px;color:var(--text2)">${pagos} de ${todosParticipantes.length} pagaram</span>
+          <span class="valor-total-chip">🏆 ${formatMoeda(premio)}</span>
+        </div>
+        <div style="padding:0 16px 4px;display:flex;gap:8px">
+          <button id="btn-atualizar-ranking" onclick="atualizarRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
+            🔄 Recalcular
+          </button>
+          <button onclick="compartilharRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
+            📤 Compartilhar
+          </button>
+        </div>
+        <div class="card" style="margin:8px 16px;padding:0;overflow:hidden">
+          ${todosParticipantes.map((p, i) => {
+            const pos = posicoes[i];
+            const emoji = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : pos;
+            const isMe = p.user_id === currentUser.id;
+            return `
+            <div class="ranking-item" style="${isMe ? 'background:rgba(108,99,255,0.08)' : ''};cursor:pointer" onclick="verPalpitesParticipante('${p.id}')">
+              <div class="ranking-pos ${pos <= 3 ? `pos-${pos}` : ''}">${emoji}</div>
+              <div class="ranking-avatar">${iniciais(p.nome)}</div>
+              <div class="ranking-info">
+                <div class="ranking-nome">${p.nome}${isMe ? ' <span style="font-size:11px;color:var(--accent)">(você)</span>' : ''}</div>
+                ${p.trash_talk ? `<div style="font-size:11px;color:var(--accent2);margin-top:2px;font-style:italic">"${p.trash_talk}"</div>` : ''}
+                <div class="ranking-sub">
+                  <span class="${p.pagamento_confirmado ? 'ranking-pagamento pago' : 'ranking-pagamento pendente'}">
+                    ${p.pagamento_confirmado ? '✓ Pago' : '⏳ Pendente'}
+                  </span>
+                </div>
+              </div>
+              <div class="ranking-pontos">
+                <div class="ranking-pts-num">${p.pontos_total}</div>
+                <div class="ranking-pts-label">pontos</div>
+              </div>
+              <div style="color:var(--text3);font-size:18px;padding-left:4px">›</div>
+            </div>`;
+          }).join('')}
+        </div>`;
+    }
+
+    function mudarAba(aba, el) {
+      abaAtiva = aba;
+      document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tabs:first-of-type .tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(`aba-${aba}`).classList.add('active');
+      el.classList.add('active');
+
+      const rodadasTabs = document.getElementById('rodadas-tabs');
+      rodadasTabs.style.display = aba === 'jogos' ? 'block' : 'none';
+
+      if (aba === 'ranking') carregarRanking();
+      if (aba === 'chaveamento') renderChaveamento();
+      if (aba === 'regras') renderRegras();
+    }
+
+    function renderRegras() {
+      if (!bolao) return;
+      const b = bolao;
+      const mult = (f) => b[`mult_${f}`] != null ? `${b[`mult_${f}`]}×` : '—';
+
+      const categorias = [
+        { pts: b.pts_placar_exato,           icon: '🎯', label: 'Placar exato',             desc: 'Acertou os dois placares' },
+        { pts: b.pts_vencedor_mais_um_time,  icon: '⭐', label: 'Vencedor + 1 placar',       desc: 'Vencedor certo e acertou o placar de um dos times' },
+        { pts: b.pts_vencedor_correto,       icon: '✅', label: 'Vencedor correto',           desc: 'Acertou apenas quem ganhou' },
+        { pts: b.pts_gols_um_time,           icon: '🔸', label: '1 placar acertado',          desc: 'Acertou o placar de um time, mas errou o vencedor' },
+        { pts: 0,                            icon: '❌', label: 'Errou',                      desc: 'Nenhuma correspondência' },
+      ];
+
+      const fases = [
+        { key: 'round32', label: 'Segunda Rodada' },
+        { key: 'oitavas', label: 'Oitavas de Final' },
+        { key: 'quartas', label: 'Quartas de Final' },
+        { key: 'semi',    label: 'Semifinal' },
+        { key: 'final',   label: 'Final' },
+      ];
+
+      document.getElementById('regras-content').innerHTML = `
+        <div style="padding:4px 0 12px">
+          <button onclick="compartilharRegras()" style="width:100%;padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
+            📤 Compartilhar regras
+          </button>
+        </div>
+        <div style="margin-bottom:20px">
+          <div class="section-title" style="margin-bottom:12px">Como ganhar pontos</div>
+          <div class="card" style="padding:0;overflow:hidden">
+            ${categorias.map(c => `
+              <div style="display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)">
+                <span style="font-size:22px;flex-shrink:0">${c.icon}</span>
+                <div style="flex:1">
+                  <div style="font-size:14px;font-weight:700">${c.label}</div>
+                  <div style="font-size:12px;color:var(--text2);margin-top:2px">${c.desc}</div>
+                </div>
+                <div style="text-align:right;flex-shrink:0">
+                  <div style="font-size:18px;font-weight:800;color:${c.pts > 0 ? 'var(--gold)' : 'var(--text3)'}">${c.pts}</div>
+                  <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">pts base</div>
+                </div>
+              </div>`).join('')}
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px">
+          <div class="section-title" style="margin-bottom:12px">Multiplicadores por fase</div>
+          <div class="card" style="padding:0;overflow:hidden">
+            ${fases.filter(f => jogos.some(j => j.fase === f.key)).map(f => `
+              <div style="display:flex;align-items:center;justify-content:space-between;padding:11px 16px;border-bottom:1px solid var(--border)">
+                <span style="font-size:14px;font-weight:600">${f.label}</span>
+                <span style="font-size:18px;font-weight:800;color:var(--accent)">${mult(f.key)}</span>
+              </div>`).join('')}
+          </div>
+          <div style="font-size:12px;color:var(--text2);margin-top:8px;padding:0 4px">
+            Os pontos base são multiplicados pelo fator da fase. Ex: placar exato nas oitavas = ${b.pts_placar_exato} × ${mult('oitavas')} = ${Math.round(b.pts_placar_exato * (b.mult_oitavas || 1))} pts.
+          </div>
+        </div>
+
+        ${b.bonus_artilheiro_ativo ? `
+        <div style="margin-bottom:20px">
+          <div class="section-title" style="margin-bottom:12px">Bônus goleador</div>
+          <div class="card" style="padding:14px 16px;display:flex;align-items:center;gap:12px">
+            <span style="font-size:28px">⚽</span>
+            <div style="flex:1">
+              <div style="font-size:14px;font-weight:700">Quem vai marcar?</div>
+              <div style="font-size:12px;color:var(--text2);margin-top:2px">Acerte quem vai fazer gol na partida</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:22px;font-weight:800;color:var(--gold)">+${b.pts_bonus_artilheiro}</div>
+              <div style="font-size:10px;color:var(--text3);font-weight:700;text-transform:uppercase">pts bônus</div>
+            </div>
+          </div>
+        </div>` : ''}
+
+        <div class="card" style="padding:14px 16px;background:rgba(108,99,255,0.06);border-color:rgba(108,99,255,0.2)">
+          <div style="font-size:13px;font-weight:700;margin-bottom:10px">Exemplo prático</div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:10px">
+            Resultado real: <strong style="color:var(--text1)">Brasil 2 × 0 Argentina</strong> — Oitavas (${mult('oitavas')})
+          </div>
+          ${[
+            { pal: 'Brasil 2 × 0', icon: '🎯', cat: 'Placar exato',        pts: Math.round(b.pts_placar_exato * (b.mult_oitavas || 1)),           color: 'var(--gold)'    },
+            { pal: 'Brasil 2 × 1', icon: '⭐', cat: 'Vencedor + 1 placar', pts: Math.round(b.pts_vencedor_mais_um_time * (b.mult_oitavas || 1)),  color: 'var(--accent2)' },
+            { pal: 'Brasil 3 × 1', icon: '✅', cat: 'Vencedor correto',    pts: Math.round(b.pts_vencedor_correto * (b.mult_oitavas || 1)),        color: 'var(--success)' },
+            { pal: 'Brasil 2 × 3', icon: '🔸', cat: '1 placar acertado',   pts: Math.round(b.pts_gols_um_time * (b.mult_oitavas || 1)),            color: 'var(--text2)'   },
+            { pal: 'Brasil 1 × 2', icon: '❌', cat: 'Errou',               pts: 0,                                                                 color: 'var(--text3)'   },
+          ].map(r => `
+            <div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-top:1px solid var(--border)">
+              <span style="font-size:15px;width:20px;flex-shrink:0;text-align:center">${r.icon}</span>
+              <div style="flex:1;min-width:0">
+                <span style="font-size:11px;color:var(--text3)">Palpite: </span>
+                <span style="font-size:12px;font-weight:700;color:var(--text1)">${r.pal}</span>
+                <span style="font-size:11px;color:var(--text2);margin-left:4px">→ ${r.cat}</span>
+              </div>
+              <span style="font-size:13px;font-weight:800;color:${r.color};flex-shrink:0">${r.pts > 0 ? '+' : ''}${r.pts} pts</span>
+            </div>`).join('')}
+        </div>`;
+    }
+
+    function verPalpites(jogoId) {
+      const jogo = jogos.find(j => j.id === jogoId);
+      if (!jogo) return;
+      const pals = todosPalpites.filter(p => p.jogo_id === jogoId);
+      const s = simulacao[jogoId] || {};
+      const hNome = s.home || jogo.time_home;
+      const aNome = s.away || jogo.time_away;
+      document.getElementById('modal-titulo').textContent = `${hNome} × ${aNome}`;
+      document.getElementById('modal-content').innerHTML = pals.length
+        ? pals.map(p => `
+          <div class="outros-palpite-row">
+            <span class="outros-nome">${p.participantes?.nome || '—'}</span>
+            <span class="outros-placar">${p.placar_home} × ${p.placar_away}</span>
+          </div>`).join('')
+        : '<p style="color:var(--text2);font-size:14px;text-align:center;padding:20px">Nenhum palpite ainda</p>';
+      document.getElementById('modal-outros').classList.add('open');
+    }
+
+    function fecharModal() {
+      document.getElementById('modal-outros').classList.remove('open');
+    }
+
+    function labelAcerto(ph, pa, rh, ra) {
+      if (rh == null || ra == null) return null;
+      if (ph === rh && pa === ra) return { icon: '🎯', label: 'Placar exato', color: 'var(--gold)' };
+      const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
+      const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
+      if (vp === vr) {
+        if (ph === rh || pa === ra) return { icon: '⭐', label: 'Vencedor + 1 placar', color: 'var(--accent2)' };
+        return { icon: '✅', label: 'Vencedor correto', color: 'var(--success)' };
+      }
+      if (ph === rh || pa === ra) return { icon: '🔸', label: '1 placar acertado', color: 'var(--text2)' };
+      return { icon: '❌', label: 'Errou', color: 'var(--text3)' };
+    }
+
+    function verPalpitesParticipante(participanteId) {
+      const part = todosParticipantes.find(p => p.id === participanteId);
+      if (!part) return;
+      const meusPals = todosPalpites.filter(p => p.participante_id === participanteId);
+      const faseOrder = ['round32', 'oitavas', 'quartas', 'semi', 'terceiro', 'final'];
+
+      // Resumo de acertos para jogos já encerrados
+      const contagem = { exato: 0, vencedorMais: 0, vencedor: 0, gol: 0, errou: 0 };
+      let totalPts = 0;
+      meusPals.forEach(p => {
+        if (p.pontos != null) totalPts += p.pontos;
+        const jogo = jogos.find(j => j.id === p.jogo_id);
+        if (jogo && jogo.placar_home != null && !jogoAberto(jogo)) {
+          const a = labelAcerto(p.placar_home, p.placar_away, jogo.placar_home, jogo.placar_away);
+          if (a?.icon === '🎯') contagem.exato++;
+          else if (a?.icon === '⭐') contagem.vencedorMais++;
+          else if (a?.icon === '✅') contagem.vencedor++;
+          else if (a?.icon === '🔸') contagem.gol++;
+          else if (a?.icon === '❌') contagem.errou++;
+        }
+      });
+      const totalContados = contagem.exato + contagem.vencedorMais + contagem.vencedor + contagem.gol + contagem.errou;
+
+      let html = '';
+
+      if (totalContados > 0) {
+        html += `<div style="background:var(--bg2);border-radius:12px;padding:14px 16px;margin-bottom:12px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+            <span style="font-size:13px;font-weight:700;color:var(--text2)">Pontuação total</span>
+            <span style="font-size:22px;font-weight:800;color:var(--gold)">${totalPts} pts</span>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:6px">
+            ${contagem.exato     ? `<span style="font-size:11px;background:rgba(255,215,0,0.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-weight:700">🎯 ${contagem.exato}×</span>` : ''}
+            ${contagem.vencedorMais ? `<span style="font-size:11px;background:rgba(0,229,176,0.1);color:var(--accent2);border-radius:20px;padding:3px 10px;font-weight:700">⭐ ${contagem.vencedorMais}×</span>` : ''}
+            ${contagem.vencedor  ? `<span style="font-size:11px;background:rgba(0,200,83,0.1);color:var(--success);border-radius:20px;padding:3px 10px;font-weight:700">✅ ${contagem.vencedor}×</span>` : ''}
+            ${contagem.gol       ? `<span style="font-size:11px;background:rgba(255,255,255,0.05);color:var(--text2);border-radius:20px;padding:3px 10px;font-weight:700">🔸 ${contagem.gol}×</span>` : ''}
+            ${contagem.errou     ? `<span style="font-size:11px;background:rgba(255,87,87,0.08);color:var(--text3);border-radius:20px;padding:3px 10px;font-weight:700">❌ ${contagem.errou}×</span>` : ''}
+          </div>
+        </div>`;
+      }
+
+      for (const fase of faseOrder) {
+        const jogosFase = jogos.filter(j => j.fase === fase).sort((a, b) => a.rodada_num - b.rodada_num);
+        const palsNaFase = jogosFase.map(j => ({ jogo: j, pal: meusPals.find(p => p.jogo_id === j.id) })).filter(x => x.pal);
+        if (!palsNaFase.length) continue;
+        html += `<div class="pals-fase-titulo">${nomeFase(fase)}</div>`;
+        for (const { jogo, pal } of palsNaFase) {
+          const s = simulacao[jogo.id] || {};
+          const hNome = s.home || jogo.time_home;
+          const aNome = s.away || jogo.time_away;
+          const fechado = !jogoAberto(jogo) || bolao?.palpites_bloqueados;
+          const acerto = fechado && jogo.placar_home != null
+            ? labelAcerto(pal.placar_home, pal.placar_away, jogo.placar_home, jogo.placar_away)
+            : null;
+          const ptsBadge = pal.pontos != null
+            ? `<span class="pts-badge">${pal.pontos}pts</span>`
+            : '';
+          const placarCol = fechado
+            ? `<div style="text-align:right">
+                <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
+                  <span class="outros-placar">${pal.placar_home} × ${pal.placar_away}</span>${ptsBadge}
+                </div>
+                ${acerto ? `<div style="font-size:10px;color:${acerto.color};font-weight:700;margin-top:2px">${acerto.icon} ${acerto.label}</div>` : ''}
+              </div>`
+            : `<span style="font-size:12px;font-weight:700;color:var(--success)">✓ Palpitou</span>`;
+          html += `<div class="outros-palpite-row" style="align-items:flex-start">
+            <span class="outros-nome" style="font-size:12px;padding-top:2px">${jogo.time_home_flag} ${hNome} × ${aNome} ${jogo.time_away_flag}</span>
+            ${placarCol}
+          </div>`;
+        }
+      }
+
+      if (!html) html = '<p style="color:var(--text2);font-size:14px;text-align:center;padding:20px">Nenhum palpite registrado</p>';
+      document.getElementById('modal-titulo').textContent = `Palpites de ${part.nome}`;
+      document.getElementById('modal-content').innerHTML = html;
+      document.getElementById('modal-outros').classList.add('open');
+    }
+
+    function copiarPix() {
+      navigator.clipboard.writeText(bolao.chave_pix);
+      showToast('Chave Pix copiada!', 'success');
+    }
+
+    function compartilhar() {
+      const url = `${location.origin}${location.pathname}?id=${bolaoId}`;
+      if (navigator.share) {
+        navigator.share({ title: bolao.nome, text: `Entre no meu bolão da Copa 2026: ${bolao.nome}`, url });
+      } else {
+        navigator.clipboard.writeText(url);
+        showToast('Link copiado!', 'success');
+      }
+    }
+
+    function compartilharBracket() {
+      if (!Object.keys(palpites).length) {
+        showToast('Salve pelo menos um palpite para compartilhar', 'error');
+        return;
+      }
+
+      const emojiFase = { round32: '🔵', oitavas: '🟢', quartas: '🟡', semi: '🟠', final: '🏆' };
+      const faseOrder = ['round32', 'oitavas', 'quartas', 'semi', 'final'];
+      let linhas = [`⚽ *Meu Palpite Copa 2026*`, `📋 Bolão: ${bolao.nome}`, ''];
+
+      for (const fase of faseOrder) {
+        const jogosFase = jogos
+          .filter(j => j.fase === fase)
+          .sort((a, b) => a.rodada_num - b.rodada_num)
+          .filter(j => palpites[j.id]);
+        if (!jogosFase.length) continue;
+
+        linhas.push(`${emojiFase[fase]} *${nomeFase(fase)}*`);
+        for (const jogo of jogosFase) {
+          const pal = palpites[jogo.id];
+          const s = simulacao[jogo.id] || {};
+          const hNome = s.home || jogo.time_home;
+          const aNome = s.away || jogo.time_away;
+          const hFlag = s.homeFlag || jogo.time_home_flag || '⬜';
+          const aFlag = s.awayFlag || jogo.time_away_flag || '⬜';
+          linhas.push(`${hFlag} ${hNome} *${pal.placar_home}×${pal.placar_away}* ${aFlag} ${aNome}`);
+        }
+        linhas.push('');
+      }
+
+      // Campeão previsto: vencedor da final segundo o palpite
+      const finalJogo = jogos.find(j => j.fase === 'final');
+      if (finalJogo) {
+        const palFinal = palpites[finalJogo.id];
+        const simFinal = simulacao[finalJogo.id] || {};
+        if (palFinal && palFinal.placar_home !== palFinal.placar_away) {
+          const venc = palFinal.placar_home > palFinal.placar_away ? 'home' : 'away';
+          const campNome = venc === 'home' ? (simFinal.home || finalJogo.time_home) : (simFinal.away || finalJogo.time_away);
+          const campFlag = venc === 'home' ? (simFinal.homeFlag || finalJogo.time_home_flag || '🏆') : (simFinal.awayFlag || finalJogo.time_away_flag || '🏆');
+          linhas.push(`🏆 *Meu campeão: ${campFlag} ${campNome}*`);
+          linhas.push('');
+        }
+      }
+
+      linhas.push(`📲 ${location.origin}${location.pathname}?id=${bolaoId}`);
+      const texto = linhas.join('\n');
+
+      if (navigator.share) {
+        navigator.share({ text: texto });
+      } else {
+        navigator.clipboard.writeText(texto);
+        showToast('Bracket copiado!', 'success');
+      }
+    }
+
+    function iniciarCountdown() {
+      function formatarTempo(ms) {
+        const total = Math.floor(ms / 1000);
+        const dias = Math.floor(total / 86400);
+        const horas = Math.floor((total % 86400) / 3600);
+        const mins = Math.floor((total % 3600) / 60);
+        const secs = total % 60;
+        if (dias > 0) return `${dias}d ${horas}h`;
+        if (horas > 0) return `${horas}h ${mins}min`;
+        if (mins > 0) return `${mins}min ${secs.toString().padStart(2,'0')}s`;
+        return `${secs}s`;
+      }
+
+      function tick() {
+        if (!jogos.length || bolao?.palpites_bloqueados) return;
+        const agora = new Date();
+        const proximo = jogos
+          .filter(j => j.data_hora && new Date(j.data_hora) > agora)
+          .sort((a, b) => new Date(a.data_hora) - new Date(b.data_hora))[0];
+
+        const bar = document.getElementById('countdown-bar');
+        if (!proximo) { bar.style.display = 'none'; return; }
+
+        const diff = new Date(proximo.data_hora) - agora;
+        const urgente = diff < 30 * 60 * 1000;
+        bar.style.display = 'flex';
+        bar.className = 'countdown-bar' + (urgente ? ' urgente' : '');
+        document.getElementById('countdown-jogo').textContent =
+          `${proximo.time_home_flag} ${proximo.time_home} × ${proximo.time_away} ${proximo.time_away_flag}`;
+        document.getElementById('countdown-timer').textContent = formatarTempo(diff);
+      }
+
+      tick();
+      setInterval(tick, 1000);
+    }
+
+    function iniciarPolling() {
+      setInterval(async () => {
+        await carregarJogos();
+        await carregarPalpites();
+        simulacao = construirSimulacao();
+        if (abaAtiva === 'jogos') renderJogos();
+        if (abaAtiva === 'ranking') carregarRanking();
+        if (abaAtiva === 'chaveamento') renderChaveamento();
+      }, 60 * 1000);
+    }
+
+    init();
+  </script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bolao-copa-2026",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "--directory", "C:\\Users\\Notebook\\Documents\\projects\\bolao-copa-2026"],
+      "port": 8000,
+      "autoPort": true
+    }
+  ]
+}

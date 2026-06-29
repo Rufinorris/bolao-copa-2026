@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Criar Bolão — Copa 2026</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <style>
+    .pts-grid { display: grid; grid-template-columns: 1fr auto; gap: 8px; align-items: center; }
+    .pts-label { font-size: 14px; }
+    .pts-input { width: 72px; text-align: center; }
+    .pts-row { padding: 10px 0; border-bottom: 1px solid var(--border); display: grid; grid-template-columns: 1fr 80px; gap: 12px; align-items: center; }
+    .pts-row:last-child { border-bottom: none; }
+    .mult-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); }
+    .mult-row:last-child { border-bottom: none; }
+    .mult-fase { font-size: 14px; }
+    .mult-controls { display: flex; align-items: center; gap: 8px; }
+    .mult-btn { width: 32px; height: 32px; border-radius: 8px; border: 1px solid var(--border); background: var(--bg3); color: var(--text); font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-family: var(--font); }
+    .mult-val { width: 40px; text-align: center; font-weight: 700; font-size: 16px; }
+    body { padding-bottom: 100px; }
+    .sticky-footer { position: fixed; bottom: 0; left: 0; right: 0; padding: 12px 16px; background: var(--bg); border-top: 1px solid var(--border); }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <button class="header-back" onclick="history.back()">‹</button>
+    <span style="font-weight:700;font-size:16px">Criar Bolão</span>
+    <div style="width:32px"></div>
+  </div>
+
+  <div class="container" style="padding-top:16px">
+
+    <!-- FOTO DE CAPA -->
+    <div class="form-group">
+      <label class="form-label">Foto de Capa</label>
+      <div class="foto-upload" id="foto-preview" onclick="document.getElementById('foto-input').click()">
+        <span class="foto-upload-icon">🖼️</span>
+        <span class="foto-upload-label">Toque para escolher uma foto</span>
+      </div>
+      <input type="file" id="foto-input" accept="image/*" style="display:none" onchange="previewFoto(this)">
+      <div class="foto-posicao-wrap" id="foto-posicao-wrap">
+        <span>⬆ Ajustar</span>
+        <input type="range" min="0" max="100" value="50" class="foto-posicao-slider" id="foto-posicao"
+          oninput="ajustarPosicao(this.value)">
+        <span>⬇</span>
+      </div>
+      <p class="form-hint">Aparece na capa do bolão para os participantes</p>
+    </div>
+
+    <!-- NOME -->
+    <div class="form-group">
+      <label class="form-label">Nome do Grupo</label>
+      <input type="text" id="nome" class="form-input" placeholder="Ex: Bolão da Firma, Galera do Fut..." maxlength="60">
+    </div>
+
+    <!-- DESCRIÇÃO -->
+    <div class="form-group">
+      <label class="form-label">Descrição <span style="color:var(--text2);font-weight:400">(opcional)</span></label>
+      <textarea id="descricao" class="form-textarea" placeholder="Uma frase sobre o grupo..."></textarea>
+    </div>
+
+    <!-- VALOR E PIX -->
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">Valor de Entrada</label>
+        <input type="number" id="valor" class="form-input" placeholder="0,00" min="0" step="0.01" value="20">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Chave Pix</label>
+        <input type="text" id="chave-pix" class="form-input" placeholder="CPF, email, tel...">
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- PONTUAÇÃO -->
+    <div class="section-title" style="margin-bottom:12px">Sistema de Pontuação</div>
+    <div class="card">
+      <div class="pts-row">
+        <div>
+          <div class="pts-label">🎯 Placar exato</div>
+          <div style="font-size:12px;color:var(--text2)">Ex: chutou 2x1, deu 2x1</div>
+        </div>
+        <input type="number" class="form-input pts-input" id="pts-exato" value="25" min="0">
+      </div>
+      <div class="pts-row">
+        <div>
+          <div class="pts-label">✅ Vencedor + gols de um time</div>
+          <div style="font-size:12px;color:var(--text2)">Ex: chutou 2x1, deu 3x1</div>
+        </div>
+        <input type="number" class="form-input pts-input" id="pts-venc-gol" value="18" min="0">
+      </div>
+      <div class="pts-row">
+        <div>
+          <div class="pts-label">👍 Vencedor/empate certo</div>
+          <div style="font-size:12px;color:var(--text2)">Ex: chutou 2x1, deu 1x0</div>
+        </div>
+        <input type="number" class="form-input pts-input" id="pts-venc" value="15" min="0">
+      </div>
+      <div class="pts-row">
+        <div>
+          <div class="pts-label">⚽ Gols de um time (errou resultado)</div>
+          <div style="font-size:12px;color:var(--text2)">Ex: chutou 2x1, deu 0x1</div>
+        </div>
+        <input type="number" class="form-input pts-input" id="pts-gol" value="4" min="0">
+      </div>
+      <div class="pts-row" style="border-bottom:none">
+        <div>
+          <div class="pts-label" style="color:var(--text2)">❌ Erro total</div>
+        </div>
+        <span style="font-size:16px;font-weight:700;color:var(--text2);padding-right:20px">0</span>
+      </div>
+    </div>
+
+    <div style="margin-top:16px" class="section-title">Multiplicadores por Fase</div>
+    <div class="card">
+      <div class="mult-row" id="mult-round32">
+        <div>
+          <div class="mult-fase">Segunda Rodada</div>
+          <div style="font-size:11px;color:var(--text2)">Round of 32</div>
+        </div>
+        <div class="mult-controls">
+          <button class="mult-btn" onclick="ajustarMult('round32', -0.5)">−</button>
+          <span class="mult-val" id="val-round32">1x</span>
+          <button class="mult-btn" onclick="ajustarMult('round32', 0.5)">+</button>
+        </div>
+      </div>
+      <div class="mult-row">
+        <div><div class="mult-fase">Oitavas de Final</div></div>
+        <div class="mult-controls">
+          <button class="mult-btn" onclick="ajustarMult('oitavas', -0.5)">−</button>
+          <span class="mult-val" id="val-oitavas">2x</span>
+          <button class="mult-btn" onclick="ajustarMult('oitavas', 0.5)">+</button>
+        </div>
+      </div>
+      <div class="mult-row">
+        <div><div class="mult-fase">Quartas de Final</div></div>
+        <div class="mult-controls">
+          <button class="mult-btn" onclick="ajustarMult('quartas', -0.5)">−</button>
+          <span class="mult-val" id="val-quartas">3x</span>
+          <button class="mult-btn" onclick="ajustarMult('quartas', 0.5)">+</button>
+        </div>
+      </div>
+      <div class="mult-row">
+        <div><div class="mult-fase">Semifinal</div></div>
+        <div class="mult-controls">
+          <button class="mult-btn" onclick="ajustarMult('semi', -0.5)">−</button>
+          <span class="mult-val" id="val-semi">4x</span>
+          <button class="mult-btn" onclick="ajustarMult('semi', 0.5)">+</button>
+        </div>
+      </div>
+      <div class="mult-row" style="border-bottom:none">
+        <div><div class="mult-fase">🏆 Final</div></div>
+        <div class="mult-controls">
+          <button class="mult-btn" onclick="ajustarMult('final', -0.5)">−</button>
+          <span class="mult-val" id="val-final">5x</span>
+          <button class="mult-btn" onclick="ajustarMult('final', 0.5)">+</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- BÔNUS ARTILHEIRO -->
+    <div style="margin-top:16px" class="section-title">Extras</div>
+    <div class="card">
+      <div class="switch">
+        <div>
+          <div class="switch-label">⚽ Bônus Artilheiro</div>
+          <div class="switch-desc">Participante acerta quem vai marcar gol</div>
+        </div>
+        <div class="toggle" id="toggle-artilheiro" onclick="toggleArtilheiro()"></div>
+      </div>
+      <div id="artilheiro-pts" style="display:none;padding-top:12px">
+        <label class="form-label">Pontos por acertar o artilheiro</label>
+        <input type="number" id="pts-artilheiro" class="form-input" value="5" min="1" style="max-width:100px">
+      </div>
+    </div>
+
+  </div>
+
+  <div class="sticky-footer">
+    <button class="btn btn-primary btn-full" id="btn-criar" onclick="criarBolao()">
+      Criar Bolão
+    </button>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
+  <script src="js/supabase.js"></script>
+  <script>
+    const mults = { round32: 1, oitavas: 2, quartas: 3, semi: 4, final: 5 };
+    let artilheiroAtivo = false;
+    let fotoFile = null;
+    let fotoPosicaoY = 50;
+
+    async function init() {
+      const user = await getUser();
+      if (!user) { window.location.href = 'index.html'; return; }
+    }
+
+    function ajustarPosicao(val) {
+      const img = document.getElementById('foto-preview-img');
+      if (img) img.style.objectPosition = `center ${val}%`;
+      fotoPosicaoY = parseInt(val);
+    }
+
+    function previewFoto(input) {
+      const file = input.files[0];
+      if (!file) return;
+      fotoFile = file;
+      const reader = new FileReader();
+      reader.onload = e => {
+        const div = document.getElementById('foto-preview');
+        div.innerHTML = `
+          <img id="foto-preview-img" src="${e.target.result}" alt="capa"
+            style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 50%">
+          <div style="position:absolute;inset:0;background:rgba(0,0,0,0.35);display:flex;align-items:center;justify-content:center;font-size:13px;color:#fff;font-weight:600;pointer-events:none">
+            Toque para trocar
+          </div>`;
+        document.getElementById('foto-posicao').value = 50;
+        document.getElementById('foto-posicao-wrap').classList.add('show');
+      };
+      reader.readAsDataURL(file);
+    }
+
+    function ajustarMult(fase, delta) {
+      mults[fase] = Math.max(0.5, Math.min(10, mults[fase] + delta));
+      document.getElementById(`val-${fase}`).textContent = mults[fase] + 'x';
+    }
+
+    function toggleArtilheiro() {
+      artilheiroAtivo = !artilheiroAtivo;
+      const toggle = document.getElementById('toggle-artilheiro');
+      const pts = document.getElementById('artilheiro-pts');
+      toggle.classList.toggle('on', artilheiroAtivo);
+      pts.style.display = artilheiroAtivo ? 'block' : 'none';
+    }
+
+    async function criarBolao() {
+      const user = await getUser();
+      if (!user) return;
+
+      const nome = document.getElementById('nome').value.trim();
+      if (!nome) { showToast('Digite o nome do bolão', 'error'); return; }
+
+      const btn = document.getElementById('btn-criar');
+      btn.textContent = 'Criando...';
+      btn.disabled = true;
+
+      let foto_capa_url = null;
+
+      // Upload foto se houver
+      if (fotoFile) {
+        const ext = fotoFile.name.split('.').pop();
+        const path = `capas/${user.id}/${Date.now()}.${ext}`;
+        const { data: upData, error: upErr } = await db.storage
+          .from('bolao-assets')
+          .upload(path, fotoFile, { upsert: true });
+        if (!upErr) {
+          const { data: urlData } = db.storage.from('bolao-assets').getPublicUrl(path);
+          foto_capa_url = urlData.publicUrl;
+        }
+      }
+
+      const bolao = {
+        admin_id: user.id,
+        nome,
+        descricao: document.getElementById('descricao').value.trim() || null,
+        foto_capa_url,
+        foto_posicao_y: fotoPosicaoY,
+        valor_entrada: parseFloat(document.getElementById('valor').value) || 0,
+        chave_pix: document.getElementById('chave-pix').value.trim() || null,
+        slug: slugify(nome),
+        status: 'active',
+        pts_placar_exato: parseInt(document.getElementById('pts-exato').value) || 25,
+        pts_vencedor_mais_um_time: parseInt(document.getElementById('pts-venc-gol').value) || 18,
+        pts_vencedor_correto: parseInt(document.getElementById('pts-venc').value) || 15,
+        pts_gols_um_time: parseInt(document.getElementById('pts-gol').value) || 4,
+        mult_round32: mults.round32,
+        mult_oitavas: mults.oitavas,
+        mult_quartas: mults.quartas,
+        mult_semi: mults.semi,
+        mult_final: mults.final,
+        bonus_artilheiro_ativo: artilheiroAtivo,
+        pts_bonus_artilheiro: parseInt(document.getElementById('pts-artilheiro').value) || 5,
+      };
+
+      const { data, error } = await db.from('boloes').insert(bolao).select().single();
+
+      if (error) {
+        showToast('Erro ao criar bolão', 'error');
+        btn.textContent = 'Criar Bolão';
+        btn.disabled = false;
+        return;
+      }
+
+      // Admin também vira participante
+      await db.from('participantes').insert({
+        bolao_id: data.id,
+        user_id: user.id,
+        nome: user.email.split('@')[0],
+        pagamento_confirmado: true
+      });
+
+      showToast('Bolão criado!', 'success');
+      setTimeout(() => window.location.href = `bolao.html?id=${data.id}`, 800);
+    }
+
+    init();
+  </script>
+</body>
+</html>
