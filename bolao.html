@@ -278,8 +278,12 @@
 <body>
   <div class="header">
     <button class="header-back" onclick="location.href='index.html'">‹</button>
-    <span id="header-nome" style="font-weight:700;font-size:16px"></span>
-    <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="btn btn-secondary btn-sm">⚙️ Admin</button>
+    <span id="header-nome" class="header-titulo"></span>
+    <div class="header-acoes">
+      <button class="icon-btn" onclick="compartilhar()" title="Compartilhar bolão">🔗</button>
+      <button class="icon-btn" onclick="compartilharBracket()" title="Compartilhar meus palpites">📊</button>
+      <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="icon-btn" title="Admin">⚙️</button>
+    </div>
   </div>
 
   <!-- Hero com capa -->
@@ -291,9 +295,9 @@
     <div class="bolao-hero-info">
       <div class="bolao-nome" id="bolao-nome">Carregando...</div>
       <div class="bolao-meta">
-        <span id="bolao-participantes">— participantes</span>
-        <span id="valor-total-meta"></span>
-        <span id="minha-posicao" style="display:none;background:rgba(255,215,0,0.15);color:var(--gold);border-radius:20px;padding:2px 10px;font-weight:800;font-size:12px"></span>
+        <span class="meta-chip" id="bolao-participantes">— participantes</span>
+        <span class="meta-chip meta-premio" id="valor-total-meta"></span>
+        <span class="meta-chip meta-pos" id="minha-posicao" style="display:none"></span>
       </div>
     </div>
   </div>
@@ -316,32 +320,6 @@
       <div class="pix-banner-key" id="pix-chave">—</div>
     </div>
     <button class="pix-copy-btn" onclick="copiarPix()">Copiar</button>
-  </div>
-
-  <!-- Premiação -->
-  <div class="premiacao-card" id="premiacao-card">
-    <div class="premiacao-valor" id="premiacao-valor">R$ 0,00</div>
-    <div class="premiacao-label">💰 Prêmio total em jogo</div>
-  </div>
-
-  <!-- Botões de compartilhamento -->
-  <div style="padding: 0 16px 8px; display:grid; grid-template-columns:1fr 1fr; gap:8px">
-    <button class="share-btn" onclick="compartilhar()">
-      🔗 Compartilhar bolão
-    </button>
-    <button class="share-btn bracket" onclick="compartilharBracket()">
-      📊 Meu bracket
-    </button>
-  </div>
-
-  <!-- Trash Talk Banner — visível em todas as abas -->
-  <div id="trash-banner" style="display:none;margin:0 16px 8px;border-radius:14px;border:1px solid rgba(0,229,176,0.3);background:linear-gradient(135deg,rgba(0,229,176,0.05),rgba(108,99,255,0.07));padding:12px 16px">
-    <div style="font-size:10px;font-weight:800;color:var(--accent2);text-transform:uppercase;letter-spacing:.8px;margin-bottom:6px">🔥 Destaque da rodada</div>
-    <div id="trash-banner-nome" style="font-size:13px;font-weight:700;color:var(--text1)"></div>
-    <div id="trash-banner-msg" style="font-size:14px;color:var(--accent2);font-style:italic;margin-top:4px"></div>
-    <div id="trash-banner-edit" style="display:none;margin-top:8px">
-      <button id="trash-banner-btn" onclick="editarTrashTalk()" style="font-size:12px;padding:6px 14px;border-radius:8px;border:1px solid var(--accent2);background:rgba(0,229,176,0.1);color:var(--accent2);cursor:pointer;font-family:var(--font);font-weight:700"></button>
-    </div>
   </div>
 
   <!-- Tabs principais -->
@@ -498,8 +476,9 @@
       document.getElementById('bolao-participantes').textContent =
         `${todosParticipantes.length} participantes`;
       const premio = pagos * (bolao.valor_entrada || 0);
-      document.getElementById('premiacao-valor').textContent = formatMoeda(premio);
-      document.getElementById('valor-total-meta').textContent = formatMoeda(premio) + ' em jogo';
+      const metaPremio = document.getElementById('valor-total-meta');
+      if (premio > 0) { metaPremio.textContent = '💰 ' + formatMoeda(premio); metaPremio.style.display = 'inline'; }
+      else { metaPremio.style.display = 'none'; }
 
       // Recalcula simulação sempre que os palpites mudam
       simulacao = construirSimulacao();
@@ -1471,6 +1450,18 @@
         if (abaAtiva === 'chaveamento') renderChaveamento();
       }, 60 * 1000);
     }
+
+    // Revela o nome do bolão no header só quando o hero sai da tela
+    (function () {
+      const hero = document.getElementById('hero');
+      const titulo = document.getElementById('header-nome');
+      if (!hero || !titulo || typeof IntersectionObserver === 'undefined') return;
+      const obs = new IntersectionObserver(
+        ([e]) => titulo.classList.toggle('visible', !e.isIntersecting),
+        { rootMargin: '-48px 0px 0px 0px' }
+      );
+      obs.observe(hero);
+    })();
 
     init();
   </script>
