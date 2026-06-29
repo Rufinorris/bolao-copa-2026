@@ -1229,7 +1229,6 @@
       const hNome = s.home || jogo.time_home;
       const aNome = s.away || jogo.time_away;
       const arts = Array.isArray(jogo.artilheiro_confirmado) ? jogo.artilheiro_confirmado.map(a => a.toLowerCase().trim()) : [];
-      const mostrarArt = bolao?.bonus_artilheiro_ativo;
       document.getElementById('modal-titulo').textContent = `${hNome} × ${aNome}`;
       document.getElementById('modal-content').innerHTML = pals.length
         ? pals.map(p => {
@@ -1237,7 +1236,7 @@
               ? labelAcerto(p.placar_home, p.placar_away, jogo.placar_home, jogo.placar_away)
               : null;
             const artAcertou = p.artilheiro && arts.length && arts.includes(p.artilheiro.toLowerCase().trim());
-            const artHtml = mostrarArt && p.artilheiro
+            const artHtml = p.artilheiro
               ? `<span style="font-size:11px;color:${artAcertou ? 'var(--gold)' : 'var(--text3)'};margin-top:2px">⚽ ${p.artilheiro}${artAcertou ? ' ✓' : ''}</span>`
               : '';
             return `
