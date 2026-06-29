@@ -488,11 +488,19 @@
             ${jogo.time_away_flag||'🛡️'} ${j}
           </label>`).join('');
 
+        const artLabel = artSalvos.length ? artSalvos.join(', ') : 'Selecionar marcadores...';
         const artilheiroSection = temArtilheiro ? `
           <div class="artilheiro-admin" id="art-section-${jogo.id}">
-            <div class="artilheiro-admin-label">⚽ Quem fez gol? <span style="color:var(--gold);font-size:10px">bônus +${bolao.pts_bonus_artilheiro} pts p/ acerto — marque todos que marcaram</span></div>
-            <div id="art-checks-${jogo.id}" style="display:flex;flex-wrap:wrap;gap:6px;max-height:150px;overflow-y:auto;padding:2px 0">
-              ${checkH}${checkA}
+            <div class="artilheiro-admin-label">⚽ Quem fez gol? <span style="color:var(--gold);font-size:10px">bônus +${bolao.pts_bonus_artilheiro} pts p/ acerto</span></div>
+            <div style="position:relative">
+              <button type="button" onclick="toggleArtDropdown('${jogo.id}')"
+                style="width:100%;display:flex;align-items:center;justify-content:space-between;gap:8px;background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:8px 12px;cursor:pointer;font-size:12px;color:var(--text1);font-family:inherit">
+                <span id="art-label-${jogo.id}" style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${artLabel}</span>
+                <span style="flex-shrink:0;opacity:.6">▾</span>
+              </button>
+              <div id="art-checks-${jogo.id}" style="display:none;position:absolute;z-index:200;top:calc(100% + 4px);left:0;right:0;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:6px;max-height:200px;overflow-y:auto;box-shadow:0 4px 16px rgba(0,0,0,.5)">
+                ${checkH}${checkA}
+              </div>
             </div>
           </div>` : '';
 
@@ -566,9 +574,23 @@
         .map(cb => cb.value);
     }
 
+    function toggleArtDropdown(jogoId) {
+      const panel = document.getElementById(`art-checks-${jogoId}`);
+      const isOpen = panel.style.display !== 'none';
+      document.querySelectorAll('[id^="art-checks-"]').forEach(p => p.style.display = 'none');
+      if (!isOpen) panel.style.display = 'block';
+    }
+
     function atualizarBordaCheck(cb) {
       const label = cb.closest('label');
       if (label) label.style.borderColor = cb.checked ? 'var(--gold)' : 'var(--border)';
+      const panel = cb.closest('[id^="art-checks-"]');
+      if (panel) {
+        const jogoId = panel.id.replace('art-checks-', '');
+        const selected = Array.from(panel.querySelectorAll('input:checked')).map(c => c.value);
+        const trigger = document.getElementById(`art-label-${jogoId}`);
+        if (trigger) trigger.textContent = selected.length ? selected.join(', ') : 'Selecionar marcadores...';
+      }
     }
 
     async function salvarResultado(jogoId) {
@@ -919,6 +941,12 @@
     }
 
     init();
+
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('[id^="art-checks-"]') && !e.target.closest('button[onclick^="toggleArtDropdown"]')) {
+        document.querySelectorAll('[id^="art-checks-"]').forEach(p => p.style.display = 'none');
+      }
+    });
   </script>
 </body>
 </html>
