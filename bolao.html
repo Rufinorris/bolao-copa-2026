@@ -692,7 +692,7 @@
               })}
             </div>
           </div>`;
-          if (finished) {
+          if (finished || isLive) {
             let h = '';
             if (artsConf.length) h += `<div style="padding:8px 14px 2px;font-size:12px;color:var(--text2)">⚽ Gol de: ${artsConf.map(a => `<strong style="color:var(--gold)">${a}</strong>`).join(', ')}</div>`;
             if (artilheiroSalvo) h += `<div style="padding:2px 14px 10px;font-size:11px;color:${artAcertouBonus ? 'var(--gold)' : 'var(--text2)'}">Seu palpite: ${artilheiroSalvo}${artAcertouBonus ? ' ✓' : ''}</div>`;
@@ -1100,6 +1100,7 @@
               <div class="ranking-info">
                 <div class="ranking-nome">${p.nome}${isMe ? ' <span style="font-size:11px;color:var(--accent)">(você)</span>' : ''}</div>
                 ${p.trash_talk ? `<div style="font-size:11px;color:var(--accent2);margin-top:2px;font-style:italic">"${p.trash_talk}"</div>` : ''}
+                ${isMe && podeTrashTalk() ? `<button onclick="event.stopPropagation();editarTrashTalk()" style="margin-top:3px;font-size:11px;padding:3px 10px;border-radius:7px;border:1px solid var(--accent2);background:rgba(0,229,176,0.1);color:var(--accent2);cursor:pointer;font-family:var(--font);font-weight:700">${p.trash_talk ? '✏️ editar recado' : '🔥 escrever recado'}</button>` : ''}
                 <div class="ranking-sub">
                   <span class="${p.pagamento_confirmado ? 'ranking-pagamento pago' : 'ranking-pagamento pendente'}">
                     ${p.pagamento_confirmado ? '✓ Pago' : '⏳ Pendente'}

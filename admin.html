@@ -544,7 +544,6 @@
               <option value="live" ${jogo.status==='live'?'selected':''}>Ao vivo</option>
               <option value="finished" ${jogo.status==='finished'?'selected':''}>Encerrado</option>
             </select>
-            <button class="atualizar-btn" title="Buscar via IA (Claude)" onclick="buscarViaIA('${jogo.id}')" id="ia-btn-${jogo.id}" style="background:rgba(108,99,255,0.15);border-color:rgba(108,99,255,0.4);color:var(--accent)">🤖</button>
             <button class="atualizar-btn" onclick="salvarResultado('${jogo.id}')">Salvar</button>
           </div>
           <div style="padding:8px 14px;border-top:1px solid var(--border)">
@@ -832,78 +831,6 @@
           if (artConfirmados.includes(pal.artilheiro.toLowerCase().trim())) total += bolao.pts_bonus_artilheiro;
         }
         await db.from('palpites').update({ pontos: total, calculado: true }).eq('id', pal.id);
-      }
-    }
-
-    const SUPABASE_FUNCTIONS_URL = 'https://depjjhmzisjmknechkcv.supabase.co/functions/v1';
-
-    async function buscarViaIA(jogoId) {
-      const jogo = jogos.find(j => j.id === jogoId);
-      if (!jogo) return;
-
-      const btn = document.getElementById(`ia-btn-${jogoId}`);
-      const textoOriginal = btn.textContent;
-      btn.textContent = '⏳';
-      btn.disabled = true;
-
-      try {
-        const { data: { session } } = await db.auth.getSession();
-        const resp = await fetch(`${SUPABASE_FUNCTIONS_URL}/buscar-placar`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${session?.access_token || ''}`,
-          },
-          body: JSON.stringify({
-            time_home: jogo.time_home,
-            time_away: jogo.time_away,
-            data_hora: jogo.data_hora,
-            fase: jogo.fase,
-          }),
-        });
-
-        const resultado = await resp.json();
-
-        if (resultado.erro || resultado.error) {
-          showToast('IA: ' + (resultado.erro || resultado.error), '');
-          return;
-        }
-
-        const ph = resultado.placar_home;
-        const pa = resultado.placar_away;
-        const status = resultado.status || 'finished';
-        const arts = resultado.artilheiros || [];
-        const fonte = resultado.fonte || '';
-
-        const placarTxt = ph != null && pa != null ? `${ph} × ${pa}` : 'sem placar';
-        const artTxt = arts.length ? `\nArtilheiros: ${arts.join(', ')}` : '';
-        const msg = `IA encontrou:\n${jogo.time_home} ${placarTxt} ${jogo.time_away}\nStatus: ${status}${artTxt}\nFonte: ${fonte}\n\nAplicar?`;
-
-        if (!confirm(msg)) return;
-
-        // Preenche os campos
-        if (ph != null) document.getElementById(`rh-${jogoId}`).value = ph;
-        if (pa != null) document.getElementById(`ra-${jogoId}`).value = pa;
-        document.getElementById(`st-${jogoId}`).value = status;
-
-        // Artilheiro (primeiro da lista)
-        const artSel = document.getElementById(`art-sel-${jogoId}`);
-        if (artSel && arts.length) {
-          const artNorm = arts[0].toLowerCase().trim();
-          for (const opt of artSel.options) {
-            if (opt.value.toLowerCase().trim() === artNorm) {
-              artSel.value = opt.value;
-              break;
-            }
-          }
-        }
-
-        showToast('Campos preenchidos — confira e clique Salvar ✓', 'success');
-      } catch (e) {
-        showToast('Erro ao chamar IA: ' + e.message, '');
-      } finally {
-        btn.textContent = textoOriginal;
-        btn.disabled = false;
       }
     }
 
