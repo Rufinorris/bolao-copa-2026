@@ -48,8 +48,8 @@ function _nomeExibicao(nome) {
   // "BRUNO G.", "ALEX B." — última parte é inicial, mantém tudo
   if (/^[A-ZÁÉÍÓÚÃÕ]\.$/.test(last)) return nome;
 
-  // "L. HENRIQUE", "H. ITO", "J ALVAREZ" — primeira parte é inicial, mostra o resto
-  if (/^[A-ZÁÉÍÓÚÃÕ]\.?$/.test(first)) return partes.slice(1).join(' ');
+  // "L. HENRIQUE", "H. ITO", "J ALVAREZ" — primeira parte é inicial, mantém tudo
+  if (/^[A-ZÁÉÍÓÚÃÕ]\.?$/.test(first)) return nome;
 
   // "BRAUT HAALAND", "ALEX SANDRO" → só o último nome
   return last;

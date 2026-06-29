@@ -668,7 +668,11 @@
         const artilheiroSalvo = pal?.artilheiro || '';
 
         const _jogoId = jogo.id;
-        const artilheiroHTML = artilheiroAtivo && !finished && temElencos && !palpitesBloqueados ? `
+        const artsConf = Array.isArray(jogo.artilheiro_confirmado) ? jogo.artilheiro_confirmado : [];
+        const artAcertouBonus = artilheiroSalvo && artsConf.length && artsConf.map(a => a.toLowerCase().trim()).includes(artilheiroSalvo.toLowerCase().trim());
+        const artilheiroHTML = (() => {
+          if (!artilheiroAtivo) return '';
+          if (!finished && temElencos && !palpitesBloqueados) return `
           <div class="artilheiro-section">
             <div class="artilheiro-label" onclick="toggleCampinho('${_jogoId}')" style="cursor:pointer">
               ⚽ Quem vai marcar?
@@ -687,10 +691,15 @@
                 }
               })}
             </div>
-          </div>` : artilheiroAtivo && (finished || palpitesBloqueados) && artilheiroSalvo ? `
-          <div style="padding:6px 14px 10px;font-size:12px;color:var(--text2)">
-            ⚽ Marcador: <strong style="color:var(--text)">${artilheiroSalvo}</strong>
-          </div>` : '';
+          </div>`;
+          if (finished) {
+            let h = '';
+            if (artsConf.length) h += `<div style="padding:8px 14px 2px;font-size:12px;color:var(--text2)">⚽ Gol de: ${artsConf.map(a => `<strong style="color:var(--gold)">${a}</strong>`).join(', ')}</div>`;
+            if (artilheiroSalvo) h += `<div style="padding:2px 14px 10px;font-size:11px;color:${artAcertouBonus ? 'var(--gold)' : 'var(--text2)'}">Seu palpite: ${artilheiroSalvo}${artAcertouBonus ? ' ✓' : ''}</div>`;
+            return h;
+          }
+          return artilheiroSalvo ? `<div style="padding:6px 14px 10px;font-size:12px;color:var(--text2)">⚽ Marcador: <strong style="color:var(--text)">${artilheiroSalvo}</strong></div>` : '';
+        })();
 
         // Hint do footer
         let footerHint;
