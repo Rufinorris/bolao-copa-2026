@@ -692,8 +692,11 @@ a { color: inherit; text-decoration: none; }
    ============================================= */
 .bolao-hero {
   position: relative;
-  height: 140px;
   overflow: hidden;
+  padding: 18px 16px;
+  min-height: 96px;
+  display: flex;
+  align-items: flex-end;
 }
 
 .bolao-hero-bg {
@@ -729,10 +732,9 @@ a { color: inherit; text-decoration: none; }
 .bolao-hero .orb-2 { width: 150px; height: 150px; background: var(--accent2); bottom: -30px; left: -20px; }
 
 .bolao-hero-info {
-  position: absolute;
-  bottom: 16px;
-  left: 16px;
-  right: 16px;
+  position: relative;
+  z-index: 1;
+  width: 100%;
 }
 
 .bolao-nome {
