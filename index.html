@@ -415,7 +415,7 @@
         </div>
 
         <div class="email-input-wrap" style="margin-bottom:12px">
-          <span class="email-icon">✉️</span>
+          <span class="email-icon" data-icon="mail" data-icon-size="16"></span>
           <input type="email" id="email-input" class="form-input"
             placeholder="seu@email.com" autocomplete="email"
             onkeydown="if(event.key==='Enter')autenticar()">
@@ -426,7 +426,7 @@
             placeholder="Senha" autocomplete="current-password"
             style="padding-left:14px;padding-right:40px"
             onkeydown="if(event.key==='Enter')autenticar()">
-          <button onclick="toggleSenha()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;font-size:16px;color:var(--text2)" id="olho-btn">👁️</button>
+          <button onclick="toggleSenha()" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;cursor:pointer;color:var(--text2);display:flex" id="olho-btn" data-icon="eye" data-icon-size="16"></button>
         </div>
 
         <button class="btn-magic" id="btn-auth" onclick="autenticar()">
@@ -695,7 +695,7 @@
         </div>
         <div class="bolao-item-right">
           ${b.isAdmin ? '<span class="bolao-item-badge">Admin</span>' : ''}
-          <span class="bolao-item-arrow">›</span>
+          <span class="bolao-item-arrow">${icon('chevronRight', 18)}</span>
         </div>
       </a>`).join('');
   }

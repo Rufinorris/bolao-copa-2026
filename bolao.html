@@ -1176,11 +1176,11 @@
           <span class="valor-total-chip">🏆 ${formatMoeda(premio)}</span>
         </div>
         <div style="padding:0 16px 4px;display:flex;gap:8px">
-          <button id="btn-atualizar-ranking" onclick="atualizarRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
-            🔄 Recalcular
+          <button id="btn-atualizar-ranking" onclick="atualizarRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px">
+            ${icon('refresh', 15)} Recalcular
           </button>
-          <button onclick="compartilharRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
-            📤 Compartilhar
+          <button onclick="compartilharRanking()" style="flex:1;padding:10px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px">
+            ${icon('share', 15)} Compartilhar
           </button>
         </div>
         <div class="card" style="margin:8px 16px;padding:0;overflow:hidden">
@@ -1250,8 +1250,8 @@
 
       document.getElementById('regras-content').innerHTML = `
         <div style="padding:4px 0 12px">
-          <button onclick="compartilharRegras()" style="width:100%;padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font)">
-            📤 Compartilhar regras
+          <button onclick="compartilharRegras()" style="width:100%;padding:11px;border-radius:12px;border:1px solid var(--border);background:var(--glass);color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:flex;align-items:center;justify-content:center;gap:6px">
+            ${icon('share', 15)} Compartilhar regras
           </button>
         </div>
         <div style="margin-bottom:20px">

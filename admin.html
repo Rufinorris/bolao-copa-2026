@@ -143,9 +143,9 @@
 
   <div class="tabs-scroll">
     <div class="tabs">
-      <button class="tab active" onclick="mudarAba('participantes',this)">👥 Participantes</button>
-      <button class="tab" onclick="mudarAba('resultados',this)">⚽ Resultados</button>
-      <button class="tab" onclick="mudarAba('config',this)">⚙️ Config</button>
+      <button class="tab active" onclick="mudarAba('participantes',this)"><span data-icon="users"></span> Participantes</button>
+      <button class="tab" onclick="mudarAba('resultados',this)"><span data-icon="target"></span> Resultados</button>
+      <button class="tab" onclick="mudarAba('config',this)"><span data-icon="settings"></span> Config</button>
     </div>
   </div>
 
@@ -183,7 +183,7 @@
     <div style="padding:12px 16px 0;display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
       <div class="section-title" style="margin:0">Atualizar Placares</div>
       <div style="display:flex;gap:6px">
-        <button class="espn-sync-btn" id="btn-espn" onclick="sincronizarEspn()">📡 ESPN Auto</button>
+        <button class="espn-sync-btn" id="btn-espn" onclick="sincronizarEspn()"><span data-icon="signal" data-icon-size="15"></span> <span id="espn-txt">ESPN Auto</span></button>
         <button class="btn btn-secondary btn-sm" onclick="recalcularTudo()">🔄 Recalcular</button>
       </div>
     </div>
@@ -311,6 +311,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/icons.js"></script>
   <script src="js/elencos.js"></script>
   <script src="js/espn.js"></script>
   <script>
@@ -742,7 +743,7 @@
     async function sincronizarEspn() {
       const btn = document.getElementById('btn-espn');
       btn.disabled = true;
-      btn.textContent = '⏳ Buscando...';
+      document.getElementById('espn-txt').textContent = 'Buscando...';
       try {
         // Sem data específica = busca o bracket inteiro (R32 até Final)
         const atualizacoes = await espnSincronizar(jogos, null);
@@ -801,7 +802,7 @@
         showToast('Erro ESPN: ' + e.message, '');
       } finally {
         btn.disabled = false;
-        btn.textContent = '📡 ESPN Auto';
+        document.getElementById('espn-txt').textContent = 'ESPN Auto';
       }
     }
 
@@ -937,6 +938,11 @@
       document.getElementById(`aba-${aba}`).classList.add('active');
       el.classList.add('active');
     }
+
+    // Hidrata os ícones SVG (placeholders data-icon)
+    document.querySelectorAll('[data-icon]').forEach(el => {
+      el.innerHTML = icon(el.dataset.icon, el.dataset.iconSize ? +el.dataset.iconSize : 20);
+    });
 
     init();
 
