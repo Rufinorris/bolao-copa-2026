@@ -277,12 +277,12 @@
 </head>
 <body>
   <div class="header">
-    <button class="header-back" onclick="location.href='index.html'">‹</button>
+    <button class="header-back" onclick="location.href='index.html'" data-icon="back" data-icon-size="22" aria-label="Voltar"></button>
     <span id="header-nome" class="header-titulo"></span>
     <div class="header-acoes">
-      <button class="icon-btn" onclick="compartilhar()" title="Compartilhar bolão">🔗</button>
-      <button class="icon-btn" onclick="compartilharBracket()" title="Compartilhar meus palpites">📊</button>
-      <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="icon-btn" title="Admin">⚙️</button>
+      <button class="icon-btn" onclick="compartilhar()" title="Compartilhar bolão" data-icon="share" data-icon-size="18"></button>
+      <button class="icon-btn" onclick="compartilharBracket()" title="Compartilhar meus palpites" data-icon="chart" data-icon-size="18"></button>
+      <button id="admin-btn" style="display:none" onclick="location.href='admin.html?id='+bolaoId" class="icon-btn" title="Admin" data-icon="settings" data-icon-size="18"></button>
     </div>
   </div>
 
@@ -330,10 +330,10 @@
   <!-- Tabs principais -->
   <div class="tabs-scroll">
     <div class="tabs">
-      <button class="tab active" onclick="mudarAba('jogos',this)">⚽ Palpites</button>
-      <button class="tab" onclick="mudarAba('ranking',this)">🏆 Ranking</button>
-      <button class="tab" onclick="mudarAba('chaveamento',this)">📊 Chaveamento</button>
-      <button class="tab" onclick="mudarAba('regras',this)">📋 Regras</button>
+      <button class="tab active" onclick="mudarAba('jogos',this)"><span data-icon="target"></span> Palpites</button>
+      <button class="tab" onclick="mudarAba('ranking',this)"><span data-icon="trophy"></span> Ranking</button>
+      <button class="tab" onclick="mudarAba('chaveamento',this)"><span data-icon="bracket"></span> Chaveamento</button>
+      <button class="tab" onclick="mudarAba('regras',this)"><span data-icon="rules"></span> Regras</button>
     </div>
   </div>
 
@@ -381,6 +381,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/icons.js"></script>
   <script src="js/upload.js"></script>
   <script src="js/elencos.js"></script>
   <script src="js/fotos.js"></script>
@@ -1542,6 +1543,11 @@
         if (abaAtiva === 'chaveamento') renderChaveamento();
       }, 60 * 1000);
     }
+
+    // Hidrata os ícones SVG (substitui os placeholders data-icon)
+    document.querySelectorAll('[data-icon]').forEach(el => {
+      el.innerHTML = icon(el.dataset.icon, el.dataset.iconSize ? +el.dataset.iconSize : 20) + (el.textContent ? el.textContent : '');
+    });
 
     // Revela o nome do bolão no header só quando o hero sai da tela
     (function () {
