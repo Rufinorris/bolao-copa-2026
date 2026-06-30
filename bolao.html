@@ -672,7 +672,7 @@
       const total = Math.round(pts * mult);
       if (pts === bolao.pts_placar_exato) return `<span class="jogo-pontos-badge pontos-exato">+${total} pts 🎯</span>`;
       if (pts === bolao.pts_vencedor_correto) return `<span class="jogo-pontos-badge pontos-vencedor">+${total} pts ✅</span>`;
-      if (pts === bolao.pts_gols_um_time) return `<span class="jogo-pontos-badge pontos-gol">+${total} pts ⚽</span>`;
+      if (bolao.pts_gols_um_time > 0 && pts === bolao.pts_gols_um_time) return `<span class="jogo-pontos-badge pontos-gol">+${total} pts ⚽</span>`;
       return `<span class="jogo-pontos-badge pontos-zero">0 pts</span>`;
     }
 
@@ -1328,7 +1328,7 @@
       const vp = ph > pa ? 'h' : ph < pa ? 'a' : 'd';
       const vr = rh > ra ? 'h' : rh < ra ? 'a' : 'd';
       if (vp === vr) return { icon: '✅', label: 'Vencedor correto', color: 'var(--success)' };
-      if (ph === rh || pa === ra) return { icon: '🔸', label: '1 placar acertado', color: 'var(--text2)' };
+      if (bolao.pts_gols_um_time > 0 && (ph === rh || pa === ra)) return { icon: '🔸', label: '1 placar acertado', color: 'var(--text2)' };
       return { icon: '❌', label: 'Errou', color: 'var(--text3)' };
     }
 
