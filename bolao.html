@@ -688,16 +688,35 @@
       return `<span class="jogo-pontos-badge pontos-zero">0 pts</span>`;
     }
 
+    // Destaque do líder: mostra o recado (trash talk) do 1º colocado no topo
+    function renderLiderDestaque() {
+      if (!todosParticipantes.length) return '';
+      const lider = [...todosParticipantes].sort((a, b) => (b.pontos_total || 0) - (a.pontos_total || 0))[0];
+      if (!lider || !lider.pontos_total || !lider.trash_talk) return '';
+      const ehMe = lider.user_id === currentUser.id;
+      const foto = lider.avatar_url ? `<img src="${lider.avatar_url}" alt="">` : iniciais(lider.nome);
+      return `
+        <div class="lider-destaque">
+          <div class="lider-coroa">👑</div>
+          <div class="lider-avatar">${foto}</div>
+          <div class="lider-info">
+            <div class="lider-label">Líder · ${lider.nome}${ehMe ? ' (você)' : ''}</div>
+            <div class="lider-msg">"${lider.trash_talk}"</div>
+          </div>
+        </div>`;
+    }
+
     function renderJogos() {
       const content = document.getElementById('jogos-content');
       const jogosFase = jogos.filter(j => j.fase === faseAtiva);
+      const lider = renderLiderDestaque();
 
       if (!jogosFase.length) {
-        content.innerHTML = `<div class="empty-state"><div class="empty-state-icon">🗓️</div><div class="empty-state-title">Jogos a definir</div><div class="empty-state-desc">Os confrontos desta fase serão definidos após a rodada anterior.</div></div>`;
+        content.innerHTML = lider + `<div class="empty-state"><div class="empty-state-icon">🗓️</div><div class="empty-state-title">Jogos a definir</div><div class="empty-state-desc">Os confrontos desta fase serão definidos após a rodada anterior.</div></div>`;
         return;
       }
 
-      content.innerHTML = jogosFase.map(jogo => {
+      content.innerHTML = lider + jogosFase.map(jogo => {
         const pal = palpites[jogo.id];
         const aberto = jogoAberto(jogo);
         const isLive = jogo.status === 'live';
@@ -1044,8 +1063,7 @@
       const linhas = todosParticipantes.slice(0, 10).map((p, i) => {
         if (i > 0 && p.pontos_total < todosParticipantes[i - 1].pontos_total) posAtual = i + 1;
         const pos = medalhas[posAtual - 1] || `${posAtual}º`;
-        const trash = p.trash_talk ? ` — "${p.trash_talk}"` : '';
-        return `${pos} ${p.nome} ${p.pontos_total}pts${trash}`;
+        return `${pos} ${p.nome} ${p.pontos_total}pts`;
       });
       const texto = `🏆 Bolão Copa 2026 — Ranking\n${linhas.join('\n')}\n\n${location.href}`;
 
@@ -1109,8 +1127,8 @@
       const idx = todosParticipantes.findIndex(p => p.id === participante.id);
       if (idx >= 0) todosParticipantes[idx].trash_talk = texto;
       renderRanking();
-      renderTrashBanner();
-      showToast(texto ? 'Trash talk salvo! 🔥' : 'Trash talk removido', 'success');
+      renderJogos(); // atualiza o card de destaque do líder, se for o caso
+      showToast(texto ? 'Recado salvo! 🔥' : 'Recado removido', 'success');
     }
 
     function renderRanking() {
