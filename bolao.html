@@ -580,7 +580,6 @@
 
       // Recalcula simulação sempre que os palpites mudam
       simulacao = construirSimulacao();
-      renderTrashBanner();
     }
 
     // ─── SIMULAÇÃO ─────────────────────────────────────────────────────────────
@@ -1009,7 +1008,6 @@
         .select('*').eq('bolao_id', bolaoId).order('pontos_total', { ascending: false });
       todosParticipantes = data || [];
       renderRanking();
-      renderTrashBanner();
     }
 
     async function atualizarRanking() {
@@ -1020,54 +1018,6 @@
       showToast('Ranking atualizado! ✓', 'success');
     }
 
-    function renderTrashBanner() {
-      return; // trash talk aparece no ranking, banner removido
-      const banner = document.getElementById('trash-banner');
-      if (!banner || !jogos.length || !todosPalpites.length || !todosParticipantes.length) return;
-
-      const ultimoJogo = jogos
-        .filter(j => j.status === 'finished' && j.placar_home !== null)
-        .sort((a, b) => new Date(b.data_hora) - new Date(a.data_hora))[0];
-      if (!ultimoJogo) return;
-
-      const acertadores = new Set(
-        todosPalpites.filter(p => p.jogo_id === ultimoJogo.id && p.pontos > 0).map(p => p.participante_id)
-      );
-      if (!acertadores.size) return;
-
-      // Pega o melhor colocado que acertou
-      const vencedor = todosParticipantes.find(p => acertadores.has(p.id));
-      if (!vencedor) return;
-
-      const pos = vencedor.posicao || (todosParticipantes.findIndex(p => p.id === vencedor.id) + 1);
-      const posStr = pos === 1 ? '🥇' : pos === 2 ? '🥈' : pos === 3 ? '🥉' : `${pos}º`;
-      const isMe = vencedor.user_id === currentUser?.id;
-
-      document.getElementById('trash-banner-nome').textContent =
-        `${posStr} ${vencedor.nome} — ${vencedor.pontos_total} pts`;
-
-      const msgEl = document.getElementById('trash-banner-msg');
-      if (vencedor.trash_talk) {
-        msgEl.textContent = `"${vencedor.trash_talk}"`;
-        msgEl.style.color = 'var(--accent2)';
-      } else if (isMe) {
-        msgEl.textContent = 'Você acertou! Manda um recado para o grupo →';
-        msgEl.style.color = 'var(--text2)';
-      } else {
-        msgEl.textContent = '';
-      }
-
-      const editEl = document.getElementById('trash-banner-edit');
-      if (isMe && podeTrashTalk()) {
-        editEl.style.display = 'block';
-        document.getElementById('trash-banner-btn').textContent =
-          vencedor.trash_talk ? '✏️ Editar recado' : '✏️ Escrever recado';
-      } else {
-        editEl.style.display = 'none';
-      }
-
-      banner.style.display = 'block';
-    }
 
     function compartilharRanking() {
       let posAtual = 1;
