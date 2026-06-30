@@ -419,6 +419,7 @@
       renderRodadasTabs();
       iniciarCountdown();
       iniciarPolling();
+      pingSyncAoVivo(); // dispara um sync inicial se houver jogo rolando
     }
 
     async function carregarBolao() {
@@ -1513,8 +1514,26 @@
       setInterval(tick, 1000);
     }
 
+    // Atualização automática ao vivo: só dispara quando há jogo na janela e alguém
+    // está com o app aberto. A edge function tem throttle (1 busca real/min global).
+    const FUNCTIONS_BASE = 'https://depjjhmzisjmknechkcv.supabase.co/functions/v1';
+    function temJogoNaJanela() {
+      const now = Date.now();
+      return jogos.some(j => {
+        if (j.status === 'finished' || !j.data_hora) return false;
+        if (j.time_home === 'A definir' || j.time_away === 'A definir') return false;
+        const t = new Date(j.data_hora).getTime();
+        return t <= now + 15 * 60000 && t >= now - 4 * 3600000;
+      });
+    }
+    async function pingSyncAoVivo() {
+      if (!temJogoNaJanela()) return;
+      try { await fetch(`${FUNCTIONS_BASE}/espn-sync`, { method: 'POST' }); } catch (_) {}
+    }
+
     function iniciarPolling() {
       setInterval(async () => {
+        await pingSyncAoVivo();
         await carregarJogos();
         await carregarPalpites();
         simulacao = construirSimulacao();
