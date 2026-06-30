@@ -476,7 +476,8 @@
       const inner = p.avatar_url
         ? `<img src="${p.avatar_url}" alt="">`
         : iniciais(p.nome);
-      return `<div class="ranking-avatar">${inner}</div>`;
+      if (p.user_id !== currentUser.id) return `<div class="ranking-avatar">${inner}</div>`;
+      return `<div class="ranking-avatar editavel" title="Trocar foto" onclick="event.stopPropagation();document.getElementById('avatar-file').click()">${inner}<span class="avatar-edit">${icon('camera', 16)}</span></div>`;
     }
 
     async function trocarAvatar(input) {
@@ -485,13 +486,15 @@
       if (!file || !participante) return;
       try {
         const url = await uploadImagem(file, 'avatares', { max: 256, quality: 0.85 });
-        const { error } = await db.from('participantes').update({ avatar_url: url }).eq('id', participante.id);
-        if (error) throw error;
+        // Foto de perfil é global: salva no perfil e propaga pra todos os bolões do usuário
+        await db.auth.updateUser({ data: { avatar_url: url } });
+        await db.from('participantes').update({ avatar_url: url }).eq('user_id', currentUser.id);
         participante.avatar_url = url;
-        const idx = todosParticipantes.findIndex(p => p.id === participante.id);
-        if (idx >= 0) todosParticipantes[idx].avatar_url = url;
+        todosParticipantes.forEach(p => { if (p.user_id === currentUser.id) p.avatar_url = url; });
+        const hp = document.getElementById('header-perfil-inner');
+        if (hp) hp.innerHTML = `<img src="${url}" alt="">`;
         renderRanking();
-        showToast('Foto atualizada 📷', 'success');
+        showToast('Foto atualizada', 'success');
       } catch (e) {
         showToast('Erro ao enviar: ' + e.message, '');
       }
