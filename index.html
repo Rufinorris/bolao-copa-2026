@@ -487,6 +487,7 @@
 <script src="js/supabase.js"></script>
 <script src="js/icons.js"></script>
 <script src="js/upload.js"></script>
+<script src="js/cropper.js"></script>
 <script>
   let currentUser = null;
   let meusParticipantes = [];
@@ -584,10 +585,12 @@
     const file = input.files && input.files[0];
     input.value = '';
     if (!file) return;
+    const blob = await enquadrarImagem(file, 1, 400); // quadrado p/ avatar
+    if (!blob) return;
     const avatar = document.getElementById('perfil-avatar');
     avatar.style.opacity = '0.5';
     try {
-      const url = await uploadImagem(file, 'avatares', { max: 256, quality: 0.85 });
+      const url = await uploadBlob(blob, 'avatares');
       await db.auth.updateUser({ data: { avatar_url: url } });
       currentUser = (await db.auth.getUser()).data.user;
       await db.from('participantes').update({ avatar_url: url }).eq('user_id', currentUser.id);

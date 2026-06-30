@@ -385,6 +385,7 @@
   <script src="js/supabase.js"></script>
   <script src="js/icons.js"></script>
   <script src="js/upload.js"></script>
+  <script src="js/cropper.js"></script>
   <script src="js/elencos.js"></script>
   <script src="js/fotos.js"></script>
   <script src="js/campinho.js"></script>
@@ -455,11 +456,13 @@
       const file = input.files && input.files[0];
       input.value = '';
       if (!file) return;
+      const blob = await enquadrarImagem(file, 2.8, 1000); // faixa larga p/ capa
+      if (!blob) return;
       const btn = document.getElementById('hero-edit');
       const orig = btn.textContent;
       btn.textContent = '⏳';
       try {
-        const url = await uploadImagem(file, 'capas', { max: 900, quality: 0.82 });
+        const url = await uploadBlob(blob, 'capas');
         const { error } = await db.from('boloes').update({ foto_capa_url: url }).eq('id', bolaoId);
         if (error) throw error;
         bolao.foto_capa_url = url;
@@ -484,8 +487,10 @@
       const file = input.files && input.files[0];
       input.value = '';
       if (!file || !participante) return;
+      const blob = await enquadrarImagem(file, 1, 400); // quadrado p/ avatar
+      if (!blob) return;
       try {
-        const url = await uploadImagem(file, 'avatares', { max: 256, quality: 0.85 });
+        const url = await uploadBlob(blob, 'avatares');
         // Foto de perfil é global: salva no perfil e propaga pra todos os bolões do usuário
         await db.auth.updateUser({ data: { avatar_url: url } });
         await db.from('participantes').update({ avatar_url: url }).eq('user_id', currentUser.id);
@@ -518,6 +523,13 @@
 
       if (participante?.is_coadmin) {
         document.getElementById('admin-btn').style.display = 'flex';
+      }
+
+      // Mantém o nome do participante alinhado com o nome do perfil (global)
+      const nomePerfil = currentUser.user_metadata?.nome;
+      if (nomePerfil && participante && participante.nome !== nomePerfil) {
+        await db.from('participantes').update({ nome: nomePerfil }).eq('id', participante.id);
+        participante.nome = nomePerfil;
       }
 
       // Avatar de perfil no header (foto ou iniciais) → leva pra home

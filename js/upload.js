@@ -20,10 +20,8 @@ async function _comprimirImagem(file, max, quality) {
   );
 }
 
-async function uploadImagem(file, prefixo, opts = {}) {
-  const { max = 640, quality = 0.82 } = opts;
-  if (!file || !file.type.startsWith('image/')) throw new Error('Selecione uma imagem válida');
-  const blob = await _comprimirImagem(file, max, quality);
+// Sobe um Blob já pronto (ex: recortado pelo cropper) sem recomprimir.
+async function uploadBlob(blob, prefixo) {
   const id = (crypto.randomUUID ? crypto.randomUUID() : Date.now() + '-' + Math.random().toString(36).slice(2));
   const path = `${prefixo}/${id}.jpg`;
   const { error } = await db.storage.from('imagens').upload(path, blob, {
@@ -33,4 +31,11 @@ async function uploadImagem(file, prefixo, opts = {}) {
   });
   if (error) throw error;
   return db.storage.from('imagens').getPublicUrl(path).data.publicUrl;
+}
+
+async function uploadImagem(file, prefixo, opts = {}) {
+  const { max = 640, quality = 0.82 } = opts;
+  if (!file || !file.type.startsWith('image/')) throw new Error('Selecione uma imagem válida');
+  const blob = await _comprimirImagem(file, max, quality);
+  return uploadBlob(blob, prefixo);
 }
