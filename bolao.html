@@ -1524,13 +1524,19 @@
       try { await fetch(`${FUNCTIONS_BASE}/espn-sync`, { method: 'POST' }); } catch (_) {}
     }
 
+    // Evita re-renderizar por cima de uma interação aberta (ex: campinho do artilheiro)
+    function interacaoAberta() {
+      return Array.from(document.querySelectorAll('[id^="cpn-wrap-"]'))
+        .some(w => w.style.display === 'block');
+    }
+
     function iniciarPolling() {
       setInterval(async () => {
         await pingSyncAoVivo();
         await carregarJogos();
         await carregarPalpites();
         simulacao = construirSimulacao();
-        if (abaAtiva === 'jogos') renderJogos();
+        if (abaAtiva === 'jogos' && !interacaoAberta()) renderJogos();
         if (abaAtiva === 'ranking') carregarRanking();
         if (abaAtiva === 'chaveamento') renderChaveamento();
       }, 60 * 1000);
