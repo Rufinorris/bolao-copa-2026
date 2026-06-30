@@ -289,9 +289,12 @@
   <!-- Hero com capa -->
   <div class="bolao-hero" id="hero">
     <div class="bolao-hero-bg"></div>
+    <img class="bolao-hero-img" id="hero-capa" style="display:none" alt="">
     <div class="orb orb-1"></div>
     <div class="orb orb-2"></div>
     <div class="bolao-hero-overlay"></div>
+    <button class="hero-edit" id="hero-edit" style="display:none" onclick="document.getElementById('capa-file').click()" title="Trocar capa">📷</button>
+    <input type="file" id="capa-file" accept="image/*" style="display:none" onchange="trocarCapa(this)">
     <div class="bolao-hero-info">
       <div class="bolao-nome" id="bolao-nome">Carregando...</div>
       <div class="bolao-meta">
@@ -301,6 +304,8 @@
       </div>
     </div>
   </div>
+
+  <input type="file" id="avatar-file" accept="image/*" style="display:none" onchange="trocarAvatar(this)">
 
   <!-- Countdown próximo jogo -->
   <div id="countdown-bar" class="countdown-bar" style="display:none">
@@ -376,6 +381,7 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <script src="js/supabase.js"></script>
+  <script src="js/upload.js"></script>
   <script src="js/elencos.js"></script>
   <script src="js/fotos.js"></script>
   <script src="js/campinho.js"></script>
@@ -420,8 +426,71 @@
       bolao = data;
       document.getElementById('bolao-nome').textContent = bolao.nome;
       document.getElementById('header-nome').textContent = bolao.nome;
+      aplicarCapa();
       if (bolao.admin_id === currentUser.id) {
         document.getElementById('admin-btn').style.display = 'flex';
+        document.getElementById('hero-edit').style.display = 'flex';
+      }
+    }
+
+    function aplicarCapa() {
+      const img = document.getElementById('hero-capa');
+      const hero = document.getElementById('hero');
+      if (bolao.foto_capa_url) {
+        img.src = bolao.foto_capa_url;
+        img.style.display = 'block';
+        if (bolao.foto_posicao_y != null) img.style.objectPosition = `center ${bolao.foto_posicao_y}%`;
+        hero.classList.add('tem-capa');
+      } else {
+        img.style.display = 'none';
+        hero.classList.remove('tem-capa');
+      }
+    }
+
+    async function trocarCapa(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      const btn = document.getElementById('hero-edit');
+      const orig = btn.textContent;
+      btn.textContent = '⏳';
+      try {
+        const url = await uploadImagem(file, 'capas', { max: 900, quality: 0.82 });
+        const { error } = await db.from('boloes').update({ foto_capa_url: url }).eq('id', bolaoId);
+        if (error) throw error;
+        bolao.foto_capa_url = url;
+        aplicarCapa();
+        showToast('Capa atualizada 📷', 'success');
+      } catch (e) {
+        showToast('Erro ao enviar: ' + e.message, '');
+      } finally {
+        btn.textContent = orig;
+      }
+    }
+
+    function avatarHTML(p) {
+      const editavel = p.user_id === currentUser.id;
+      const inner = p.avatar_url
+        ? `<img src="${p.avatar_url}" alt="">`
+        : iniciais(p.nome);
+      return `<div class="ranking-avatar${editavel ? ' editavel' : ''}"${editavel ? ' onclick="event.stopPropagation();document.getElementById(\'avatar-file\').click()"' : ''}>${inner}${editavel ? '<span class="avatar-edit">📷</span>' : ''}</div>`;
+    }
+
+    async function trocarAvatar(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file || !participante) return;
+      try {
+        const url = await uploadImagem(file, 'avatares', { max: 256, quality: 0.85 });
+        const { error } = await db.from('participantes').update({ avatar_url: url }).eq('id', participante.id);
+        if (error) throw error;
+        participante.avatar_url = url;
+        const idx = todosParticipantes.findIndex(p => p.id === participante.id);
+        if (idx >= 0) todosParticipantes[idx].avatar_url = url;
+        renderRanking();
+        showToast('Foto atualizada 📷', 'success');
+      } catch (e) {
+        showToast('Erro ao enviar: ' + e.message, '');
       }
     }
 
@@ -1079,7 +1148,7 @@
             return `
             <div class="ranking-item" style="${isMe ? 'background:rgba(108,99,255,0.08)' : ''};cursor:pointer" onclick="verPalpitesParticipante('${p.id}')">
               <div class="ranking-pos ${pos <= 3 ? `pos-${pos}` : ''}">${emoji}</div>
-              <div class="ranking-avatar">${iniciais(p.nome)}</div>
+              ${avatarHTML(p)}
               <div class="ranking-info">
                 <div class="ranking-nome">${p.nome}${isMe ? ' <span style="font-size:11px;color:var(--accent)">(você)</span>' : ''}</div>
                 ${p.trash_talk ? `<div style="font-size:11px;color:var(--accent2);margin-top:2px;font-style:italic">"${p.trash_talk}"</div>` : ''}
