@@ -3,7 +3,10 @@
 // Sem key, sem custo. Funciona para scores + fixtures.
 // =============================================
 
-const ESPN_BASE = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
+// A ESPN bloqueia CORS no navegador (Failed to fetch). Por isso passamos por um
+// proxy edge function (Supabase) que busca server-side e devolve com CORS liberado.
+const ESPN_PROXY = 'https://depjjhmzisjmknechkcv.supabase.co/functions/v1/espn-proxy';
+function _espnUrl(rest) { return `${ESPN_PROXY}?path=${encodeURIComponent(rest)}`; }
 
 // Mapa nomes ESPN → nossos nomes
 const ESPN_NOME_MAP = {
@@ -68,10 +71,8 @@ function nomeEspnParaNosso(nome) {
 
 // Busca eventos de um scoreboard (aceita data YYYYMMDD ou range YYYYMMDD-YYYYMMDD)
 async function espnFetch(dates) {
-  const url = dates
-    ? `${ESPN_BASE}/scoreboard?dates=${dates}&limit=50`
-    : `${ESPN_BASE}/scoreboard?limit=50`;
-  const r = await fetch(url);
+  const rest = dates ? `scoreboard?dates=${dates}&limit=50` : `scoreboard?limit=50`;
+  const r = await fetch(_espnUrl(rest));
   if (!r.ok) throw new Error(`ESPN HTTP ${r.status}`);
   const d = await r.json();
   return d.events || [];
@@ -79,7 +80,7 @@ async function espnFetch(dates) {
 
 // Detalhes de um evento (artilheiros, etc.)
 async function espnDetalhes(eventId) {
-  const r = await fetch(`${ESPN_BASE}/summary?event=${eventId}`);
+  const r = await fetch(_espnUrl(`summary?event=${eventId}`));
   if (!r.ok) return null;
   return r.json();
 }
