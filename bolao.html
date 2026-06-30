@@ -277,7 +277,9 @@
 </head>
 <body>
   <div class="header">
-    <button class="header-back" onclick="location.href='index.html'" data-icon="back" data-icon-size="22" aria-label="Voltar"></button>
+    <button class="header-perfil" id="header-perfil" onclick="location.href='index.html'" aria-label="Início e perfil">
+      <span id="header-perfil-inner"></span>
+    </button>
     <span id="header-nome" class="header-titulo"></span>
     <div class="header-acoes">
       <button class="icon-btn" onclick="compartilhar()" title="Compartilhar bolão" data-icon="share" data-icon-size="18"></button>
@@ -471,11 +473,10 @@
     }
 
     function avatarHTML(p) {
-      const editavel = p.user_id === currentUser.id;
       const inner = p.avatar_url
         ? `<img src="${p.avatar_url}" alt="">`
         : iniciais(p.nome);
-      return `<div class="ranking-avatar${editavel ? ' editavel' : ''}"${editavel ? ' onclick="event.stopPropagation();document.getElementById(\'avatar-file\').click()"' : ''}>${inner}${editavel ? '<span class="avatar-edit">📷</span>' : ''}</div>`;
+      return `<div class="ranking-avatar">${inner}</div>`;
     }
 
     async function trocarAvatar(input) {
@@ -514,6 +515,13 @@
 
       if (participante?.is_coadmin) {
         document.getElementById('admin-btn').style.display = 'flex';
+      }
+
+      // Avatar de perfil no header (foto ou iniciais) → leva pra home
+      const headerPerfil = document.getElementById('header-perfil-inner');
+      if (headerPerfil) {
+        const foto = participante?.avatar_url;
+        headerPerfil.innerHTML = foto ? `<img src="${foto}" alt="">` : iniciais(participante?.nome || currentUser.email);
       }
 
       if (!participante.pagamento_confirmado && bolao.admin_id !== currentUser.id && bolao.chave_pix) {

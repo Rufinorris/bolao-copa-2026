@@ -17,6 +17,8 @@ const ICON_PATHS = {
   settings: '<line x1="4" y1="7" x2="20" y2="7"/><circle cx="15" cy="7" r="2.5"/><line x1="4" y1="17" x2="20" y2="17"/><circle cx="9" cy="17" r="2.5"/>',
   refresh:  '<polyline points="21 4 21 10 15 10"/><path d="M21 10a9 9 0 1 0-2.6 6.4"/>',
   camera:   '<path d="M5 8h3l1.5-2h5L16 8h3a1 1 0 0 1 1 1v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V9a1 1 0 0 1 1-1z"/><circle cx="12" cy="13" r="3.2"/>',
+  edit:     '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
+  logout:   '<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/>',
 };
 
 function icon(name, size) {

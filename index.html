@@ -336,6 +336,34 @@
       font-size: 12px; font-weight: 800; color: #fff;
     }
     .user-email { font-size: 12px; font-weight: 600; color: var(--text2); max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+    /* ── PERFIL (home como hub) ── */
+    .perfil-row { display: flex; align-items: center; gap: 14px; }
+    .perfil-avatar {
+      position: relative; width: 64px; height: 64px; border-radius: 50%; flex-shrink: 0;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; font-weight: 800; color: #fff; cursor: pointer;
+      border: 2px solid rgba(255,255,255,0.15); overflow: hidden; padding: 0;
+      font-family: var(--font);
+    }
+    .perfil-avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .perfil-avatar-cam {
+      position: absolute; right: -2px; bottom: -2px;
+      width: 22px; height: 22px; border-radius: 50%;
+      background: var(--accent); color: #fff;
+      display: flex; align-items: center; justify-content: center;
+      border: 2px solid var(--bg);
+    }
+    .perfil-info { flex: 1; min-width: 0; }
+    .perfil-info .logged-hero-name { margin-bottom: 0; }
+    .perfil-nome-row { display: flex; align-items: center; gap: 8px; }
+    .perfil-edit {
+      background: none; border: none; color: var(--text2); cursor: pointer;
+      display: inline-flex; padding: 2px; font-family: var(--font);
+    }
+    .perfil-edit:active { transform: scale(0.9); }
+    .perfil-email { font-size: 12px; color: var(--text3); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   </style>
 </head>
 <body>
@@ -419,11 +447,21 @@
   </div>
 
   <div class="logged-hero">
-    <div class="logged-hero-greeting">Bem-vindo de volta,</div>
-    <div class="logged-hero-name" id="logged-name">—</div>
-    <div class="logged-header">
-      <div id="user-chip-area"></div>
+    <div class="perfil-row">
+      <button class="perfil-avatar" id="perfil-avatar" onclick="document.getElementById('perfil-foto-file').click()" title="Trocar foto">
+        <span id="perfil-avatar-inner">—</span>
+        <span class="perfil-avatar-cam" data-icon="camera" data-icon-size="14"></span>
+      </button>
+      <div class="perfil-info">
+        <div class="logged-hero-greeting">Bem-vindo de volta,</div>
+        <div class="perfil-nome-row">
+          <span class="logged-hero-name" id="perfil-nome">—</span>
+          <button class="perfil-edit" onclick="editarNomePerfil()" data-icon="edit" data-icon-size="14" title="Editar nome"></button>
+        </div>
+        <div class="perfil-email" id="perfil-email"></div>
+      </div>
     </div>
+    <input type="file" id="perfil-foto-file" accept="image/*" style="display:none" onchange="trocarFotoPerfil(this)">
   </div>
 
   <div class="boloes-lista">
@@ -447,8 +485,11 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
 <script src="js/supabase.js"></script>
+<script src="js/icons.js"></script>
+<script src="js/upload.js"></script>
 <script>
   let currentUser = null;
+  let meusParticipantes = [];
 
   let modoAuth = 'entrar';
 
@@ -490,7 +531,7 @@
     }
   }
 
-  function mostrarLogado() {
+  async function mostrarLogado() {
     const redirect = localStorage.getItem('bolao_redirect');
     if (redirect) {
       localStorage.removeItem('bolao_redirect');
@@ -498,16 +539,64 @@
       return;
     }
     document.getElementById('screen-logged').style.display = 'block';
-    const nome = currentUser.user_metadata?.nome || currentUser.email.split('@')[0];
-    document.getElementById('logged-name').textContent = nome;
     document.getElementById('user-area').innerHTML =
       `<button class="btn btn-secondary btn-sm" onclick="signOut()">Sair</button>`;
-    document.getElementById('user-chip-area').innerHTML = `
-      <div class="user-chip">
-        <div class="user-avatar">${iniciais(nome)}</div>
-        <span class="user-email">${currentUser.email}</span>
-      </div>`;
+    document.getElementById('perfil-email').textContent = currentUser.email;
+
+    // Carrega as participações (pra aproveitar foto já existente e propagar edições)
+    const { data: parts } = await db.from('participantes').select('id, avatar_url').eq('user_id', currentUser.id);
+    meusParticipantes = parts || [];
+    renderPerfil();
     carregarBoloes();
+  }
+
+  // Foto de perfil: usa user_metadata.avatar_url; se não tiver, aproveita a foto
+  // de qualquer bolão que a pessoa já participe ("quem já tem foto").
+  function fotoPerfilAtual() {
+    if (currentUser.user_metadata?.avatar_url) return currentUser.user_metadata.avatar_url;
+    const comFoto = meusParticipantes.find(p => p.avatar_url);
+    return comFoto ? comFoto.avatar_url : null;
+  }
+  function nomePerfilAtual() {
+    return currentUser.user_metadata?.nome || currentUser.email.split('@')[0];
+  }
+
+  function renderPerfil() {
+    const nome = nomePerfilAtual();
+    document.getElementById('perfil-nome').textContent = nome;
+    const foto = fotoPerfilAtual();
+    document.getElementById('perfil-avatar-inner').innerHTML =
+      foto ? `<img src="${foto}" alt="">` : iniciais(nome);
+  }
+
+  async function editarNomePerfil() {
+    const novo = prompt('Seu nome (aparece em todos os seus bolões):', nomePerfilAtual());
+    if (novo === null) return;
+    const nome = novo.trim();
+    if (!nome) return;
+    await db.auth.updateUser({ data: { nome } });
+    currentUser = (await db.auth.getUser()).data.user;
+    await db.from('participantes').update({ nome }).eq('user_id', currentUser.id);
+    renderPerfil();
+  }
+
+  async function trocarFotoPerfil(input) {
+    const file = input.files && input.files[0];
+    input.value = '';
+    if (!file) return;
+    const avatar = document.getElementById('perfil-avatar');
+    avatar.style.opacity = '0.5';
+    try {
+      const url = await uploadImagem(file, 'avatares', { max: 256, quality: 0.85 });
+      await db.auth.updateUser({ data: { avatar_url: url } });
+      currentUser = (await db.auth.getUser()).data.user;
+      await db.from('participantes').update({ avatar_url: url }).eq('user_id', currentUser.id);
+      renderPerfil();
+    } catch (e) {
+      alert('Erro ao enviar a foto: ' + e.message);
+    } finally {
+      avatar.style.opacity = '';
+    }
   }
 
   async function autenticar() {
@@ -607,6 +696,11 @@
         </div>
       </a>`).join('');
   }
+
+  // Hidrata os ícones SVG (placeholders data-icon)
+  document.querySelectorAll('[data-icon]').forEach(el => {
+    el.innerHTML = icon(el.dataset.icon, el.dataset.iconSize ? +el.dataset.iconSize : 20);
+  });
 
   init();
 </script>
