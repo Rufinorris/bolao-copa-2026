@@ -115,14 +115,27 @@ async function espnBuildUpdate(jogo, evento) {
   const s0 = parseInt(c0.score || 0) || 0;
   const s1 = parseInt(c1.score || 0) || 0;
 
+  const statusName = evento.status?.type?.name;
   const statusMap = {
     STATUS_SCHEDULED:   'scheduled',
     STATUS_IN_PROGRESS: 'live',
     STATUS_HALFTIME:    'live',
+    STATUS_FIRST_HALF:  'live',
+    STATUS_SECOND_HALF: 'live',
+    STATUS_OVERTIME:    'live',
     STATUS_FULL_TIME:   'finished',
     STATUS_FINAL:       'finished',
+    STATUS_FINAL_PEN:   'finished',
   };
-  const status = statusMap[evento.status?.type?.name] || 'scheduled';
+  const status = statusMap[statusName] || 'scheduled';
+
+  // Vencedor pelo campo winner da ESPN (vale para prorrogação e pênaltis, onde o placar empata)
+  let vencedor = null;
+  if (status === 'finished') {
+    if (c0.winner) vencedor = invertido ? 'away' : 'home';
+    else if (c1.winner) vencedor = invertido ? 'home' : 'away';
+  }
+  const foi_penaltis = statusName === 'STATUS_FINAL_PEN';
 
   let artilheiros = [];
   if (status !== 'scheduled') {
@@ -142,6 +155,8 @@ async function espnBuildUpdate(jogo, evento) {
     placar_home: status !== 'scheduled' ? (invertido ? s1 : s0) : undefined,
     placar_away: status !== 'scheduled' ? (invertido ? s0 : s1) : undefined,
     status,
+    vencedor,
+    foi_penaltis,
     artilheiros,
   };
 }

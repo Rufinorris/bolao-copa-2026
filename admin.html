@@ -715,6 +715,9 @@
       }
 
       const { error: rErr } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      await db.rpc('propagar_vencedores'); // vencedor real avança no bracket
+      await carregarJogos();
+      renderJogosAdmin();
       if (rErr) {
         console.error('[ranking] recalcular_ranking error:', rErr);
         showToast('Erro ao recalcular ranking: ' + rErr.message, '');
@@ -758,9 +761,9 @@
           if (upd.status !== 'scheduled' && upd.placar_home !== undefined && !jaEncerradoManual) {
             update.placar_home = upd.placar_home;
             update.placar_away = upd.placar_away;
-            const h = upd.placar_home, a = upd.placar_away;
             if (upd.status === 'finished') {
-              update.vencedor = h > a ? 'home' : h < a ? 'away' : null;
+              update.vencedor = upd.vencedor;        // via campo winner da ESPN (cobre pênaltis)
+              if (upd.foi_penaltis) update.foi_penaltis = true;
             }
           }
 
@@ -776,6 +779,8 @@
             atualizados++;
           }
         }
+        await db.rpc('propagar_vencedores'); // vencedor real avança no bracket
+        await carregarJogos();
         renderFasesTabs();
         renderJogosAdmin();
         showToast(`ESPN: ${atualizados} jogo(s) sincronizado(s) ✓`, 'success');

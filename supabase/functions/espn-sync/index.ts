@@ -108,12 +108,17 @@ Deno.serve(async (req) => {
     let c0 = comp.competitors[0], c1 = comp.competitors[1];
     if (norm(c0.team.displayName) !== h) { const tmp = c0; c0 = c1; c1 = tmp; }
 
-    const st = STATUS_MAP[ev.status && ev.status.type && ev.status.type.name] || 'scheduled';
+    const statusName = ev.status && ev.status.type && ev.status.type.name;
+    const st = STATUS_MAP[statusName] || 'scheduled';
     const upd = { status: st };
     if (st !== 'scheduled') {
       upd.placar_home = parseInt(c0.score) || 0;
       upd.placar_away = parseInt(c1.score) || 0;
-      if (st === 'finished') upd.vencedor = upd.placar_home > upd.placar_away ? 'home' : upd.placar_home < upd.placar_away ? 'away' : null;
+      if (st === 'finished') {
+        // Vencedor pelo campo winner da ESPN (vale para prorrogação e pênaltis)
+        upd.vencedor = c0.winner ? 'home' : c1.winner ? 'away' : null;
+        if (statusName === 'STATUS_FINAL_PEN') upd.foi_penaltis = true;
+      }
       try {
         const r = await fetch(ESPN + '/summary?event=' + ev.id);
         if (r.ok) {
@@ -131,8 +136,11 @@ Deno.serve(async (req) => {
     n++;
   }
 
-  // 5. Recalcula pontos + ranking
-  if (n > 0) await rest('rpc/recalcular_tudo', { method: 'POST', headers: H, body: '{}' });
+  // 5. Vencedor real avança no bracket + recalcula pontos/ranking
+  if (n > 0) {
+    await rest('rpc/propagar_vencedores', { method: 'POST', headers: H, body: '{}' });
+    await rest('rpc/recalcular_tudo', { method: 'POST', headers: H, body: '{}' });
+  }
 
   return json({ ok: true, atualizados: n, datas: datas });
 });
