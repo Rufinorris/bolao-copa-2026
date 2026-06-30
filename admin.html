@@ -688,57 +688,21 @@
         if (idx >= 0) jogos[idx] = { ...jogos[idx], ...update };
         showToast('Resultado salvo!', 'success');
         if (status === 'finished') {
-          // Reset calculado=false para recalcular mesmo se já foi calculado antes
-          await db.from('palpites').update({ calculado: false, pontos: null }).eq('jogo_id', jogoId);
           await calcularPontosPorJogo(jogoId);
         }
       }
     }
 
-    async function calcularPontosPorJogo(jogoId) {
-      const jogo = jogos.find(j => j.id === jogoId);
-      if (!jogo || jogo.placar_home === null) return;
-
-      // Busca TODOS os palpites (calculado ou não) para recalcular com o resultado atual
-      const { data: palpites } = await db.from('palpites')
-        .select('*').eq('jogo_id', jogoId);
-
-      if (!palpites?.length) {
-        // Sem palpites no jogo, ainda recalcula ranking (pode ter mudado de outros jogos)
-        const { error: rErr } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
-        if (rErr) console.error('[ranking] recalcular_ranking error:', rErr);
-        return;
-      }
-
-      const mult = { round32: bolao.mult_round32, oitavas: bolao.mult_oitavas, quartas: bolao.mult_quartas, semi: bolao.mult_semi, final: bolao.mult_final, terceiro: 1 }[jogo.fase] || 1;
-      const artConfirmados = Array.isArray(jogo.artilheiro_confirmado)
-        ? jogo.artilheiro_confirmado.map(a => a.toLowerCase().trim())
-        : [];
-
-      for (const pal of palpites) {
-        let pts = calcPts(pal.placar_home, pal.placar_away, jogo.placar_home, jogo.placar_away);
-        let total = Math.round(pts * mult);
-
-        if (bolao.bonus_artilheiro_ativo && artConfirmados.length && pal.artilheiro) {
-          if (artConfirmados.includes(pal.artilheiro.toLowerCase().trim())) {
-            total += bolao.pts_bonus_artilheiro;
-          }
-        }
-
-        const { error: pErr } = await db.rpc('atualizar_pontos_palpite', { p_id: pal.id, p_pontos: total });
-        if (pErr) console.error('[ranking] erro ao atualizar palpite', pal.id, pErr);
-      }
-
-      const { error: rErr } = await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+    async function calcularPontosPorJogo() {
+      // Jogos são globais: recalcula os pontos de TODOS os palpites (cada um com as
+      // regras do seu próprio bolão) e o ranking de TODOS os bolões — não só o atual.
+      const { error } = await db.rpc('recalcular_tudo');
+      if (error) console.error('[ranking] recalcular_tudo:', error);
       await db.rpc('propagar_vencedores'); // vencedor real avança no bracket
       await carregarJogos();
       renderJogosAdmin();
-      if (rErr) {
-        console.error('[ranking] recalcular_ranking error:', rErr);
-        showToast('Erro ao recalcular ranking: ' + rErr.message, '');
-      } else {
-        showToast('Pontos calculados! ✓', 'success');
-      }
+      if (error) showToast('Erro ao recalcular: ' + error.message, '');
+      else showToast('Pontos e ranking atualizados! ✓', 'success');
     }
 
     async function sincronizarEspn() {
@@ -790,11 +754,11 @@
           if (!error) {
             const idx = jogos.findIndex(j => j.id === upd.id);
             if (idx >= 0) jogos[idx] = { ...jogos[idx], ...update };
-            if (upd.status === 'finished') await calcularPontosPorJogo(upd.id);
             atualizados++;
           }
         }
         await db.rpc('propagar_vencedores'); // vencedor real avança no bracket
+        await db.rpc('recalcular_tudo');      // pontos + ranking de TODOS os bolões
         await carregarJogos();
         renderFasesTabs();
         renderJogosAdmin();

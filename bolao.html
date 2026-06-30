@@ -1014,7 +1014,7 @@
     async function atualizarRanking() {
       const btn = document.getElementById('btn-atualizar-ranking');
       if (btn) { btn.textContent = 'Calculando...'; btn.disabled = true; }
-      await db.rpc('recalcular_ranking', { p_bolao_id: bolaoId });
+      await db.rpc('recalcular_tudo'); // pontos + ranking de todos os bolões
       await carregarRanking();
       showToast('Ranking atualizado! ✓', 'success');
     }
@@ -1332,7 +1332,7 @@
       const faseOrder = ['round32', 'oitavas', 'quartas', 'semi', 'terceiro', 'final'];
 
       // Resumo de acertos para jogos já encerrados
-      const contagem = { exato: 0, vencedor: 0, gol: 0, errou: 0 };
+      const contagem = { exato: 0, vencedor: 0, gol: 0, errou: 0, goleador: 0 };
       let totalPts = 0;
       meusPals.forEach(p => {
         if (p.pontos != null) totalPts += p.pontos;
@@ -1343,6 +1343,8 @@
           else if (a?.icon === '✅') contagem.vencedor++;
           else if (a?.icon === '🔸') contagem.gol++;
           else if (a?.icon === '❌') contagem.errou++;
+          const arts = Array.isArray(jogo.artilheiro_confirmado) ? jogo.artilheiro_confirmado.map(x => x.toLowerCase().trim()) : [];
+          if (p.artilheiro && arts.length && arts.includes(p.artilheiro.toLowerCase().trim())) contagem.goleador++;
         }
       });
       const totalContados = contagem.exato + contagem.vencedor + contagem.gol + contagem.errou;
@@ -1359,6 +1361,7 @@
             ${contagem.exato   ? `<span style="font-size:11px;background:rgba(255,215,0,0.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-weight:700">🎯 ${contagem.exato}×</span>` : ''}
             ${contagem.vencedor? `<span style="font-size:11px;background:rgba(0,200,83,0.1);color:var(--success);border-radius:20px;padding:3px 10px;font-weight:700">✅ ${contagem.vencedor}×</span>` : ''}
             ${contagem.gol     ? `<span style="font-size:11px;background:rgba(255,255,255,0.05);color:var(--text2);border-radius:20px;padding:3px 10px;font-weight:700">🔸 ${contagem.gol}×</span>` : ''}
+            ${contagem.goleador? `<span style="font-size:11px;background:rgba(255,215,0,0.12);color:var(--gold);border-radius:20px;padding:3px 10px;font-weight:700">⚽ ${contagem.goleador}×</span>` : ''}
             ${contagem.errou   ? `<span style="font-size:11px;background:rgba(255,87,87,0.08);color:var(--text3);border-radius:20px;padding:3px 10px;font-weight:700">❌ ${contagem.errou}×</span>` : ''}
           </div>
         </div>`;
@@ -1380,12 +1383,18 @@
           const ptsBadge = pal.pontos != null
             ? `<span class="pts-badge">${pal.pontos}pts</span>`
             : '';
+          const artsConf = Array.isArray(jogo.artilheiro_confirmado) ? jogo.artilheiro_confirmado.map(x => x.toLowerCase().trim()) : [];
+          const artAcertou = pal.artilheiro && artsConf.length && artsConf.includes(pal.artilheiro.toLowerCase().trim());
+          const golLinha = (fechado && pal.artilheiro)
+            ? `<div style="font-size:10px;color:${artAcertou ? 'var(--gold)' : 'var(--text3)'};font-weight:700;margin-top:2px">⚽ ${pal.artilheiro}${artAcertou ? ` ✓ +${bolao.pts_bonus_artilheiro || 0}pts` : ''}</div>`
+            : '';
           const placarCol = fechado
             ? `<div style="text-align:right">
                 <div style="display:flex;align-items:center;gap:6px;justify-content:flex-end">
                   <span class="outros-placar">${pal.placar_home} × ${pal.placar_away}</span>${ptsBadge}
                 </div>
                 ${acerto ? `<div style="font-size:10px;color:${acerto.color};font-weight:700;margin-top:2px">${acerto.icon} ${acerto.label}</div>` : ''}
+                ${golLinha}
               </div>`
             : `<span style="font-size:12px;font-weight:700;color:var(--success)">✓ Palpitou</span>`;
           html += `<div class="outros-palpite-row" style="align-items:flex-start">
