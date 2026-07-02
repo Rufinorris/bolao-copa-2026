@@ -128,7 +128,16 @@ Deno.serve(async (req) => {
             const tipo = (e.type && e.type.text) || '';
             if (!/goal/i.test(tipo) || /own goal/i.test(tipo)) continue;
             const nm = e.participants && e.participants[0] && e.participants[0].athlete && e.participants[0].athlete.displayName;
-            if (nm && nomes.indexOf(nm) === -1) nomes.push(nm);
+            if (!nm) continue;
+            const teamEspn = e.team && e.team.displayName;
+            const nossoTime = NOME_MAP[teamEspn] || teamEspn || '';
+            // Converte o nome completo da ESPN no nome de camisa (via tabela jogadores)
+            let camisa = nm;
+            try {
+              const cr = await rest('rpc/converter_artilheiro', { method: 'POST', headers: H, body: JSON.stringify({ p_display: nm, p_time: nossoTime }) });
+              if (cr.ok) { const v = await cr.json(); if (v) camisa = v; }
+            } catch (_) { /* mantem o nome original */ }
+            if (nomes.indexOf(camisa) === -1) nomes.push(camisa);
           }
           if (nomes.length) upd.artilheiro_confirmado = nomes;
         }
