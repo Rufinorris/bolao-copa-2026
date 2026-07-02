@@ -7,7 +7,7 @@
 // =============================================
 
 const ESPN = 'https://site.api.espn.com/apis/site/v2/sports/soccer/fifa.world';
-const THROTTLE_MS = 60000;
+const THROTTLE_MS = 25000;
 const cors = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -124,8 +124,10 @@ Deno.serve(async (req) => {
         if (r.ok) {
           const s = await r.json();
           const nomes = [];
-          for (const p of (s.scoringPlays || [])) {
-            const nm = p.participants && p.participants[0] && p.participants[0].athlete && p.participants[0].athlete.displayName;
+          for (const e of (s.keyEvents || [])) {
+            const tipo = (e.type && e.type.text) || '';
+            if (!/goal/i.test(tipo) || /own goal/i.test(tipo)) continue;
+            const nm = e.participants && e.participants[0] && e.participants[0].athlete && e.participants[0].athlete.displayName;
             if (nm && nomes.indexOf(nm) === -1) nomes.push(nm);
           }
           if (nomes.length) upd.artilheiro_confirmado = nomes;

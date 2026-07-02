@@ -1541,8 +1541,11 @@
     }
 
     function iniciarPolling() {
+      // Sincroniza com a ESPN a cada 25s (leve, com throttle na edge function);
+      // o resultado chega instantâneo via realtime → placar ao vivo atualiza mais rápido.
+      setInterval(pingSyncAoVivo, 25 * 1000);
+      // Render de segurança a cada 60s (o realtime já cobre o principal)
       setInterval(async () => {
-        await pingSyncAoVivo();
         await carregarJogos();
         await carregarPalpites();
         simulacao = construirSimulacao();

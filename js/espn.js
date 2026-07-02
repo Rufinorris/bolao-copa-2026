@@ -85,18 +85,43 @@ async function espnDetalhes(eventId) {
   return r.json();
 }
 
-// Extrai artilheiro(s) do summary ESPN
+// Extrai os gols do summary ESPN. Os gols ficam em keyEvents (não em scoringPlays,
+// que costuma vir vazio). Retorna [{ nome, timeEspn }] — gol contra é ignorado.
 function espnArtilheiros(summary) {
-  const nomes = [];
-  const plays = summary?.scoringPlays || [];
-  for (const p of plays) {
-    const participantes = p.participants || [];
-    if (participantes.length) {
-      const nome = participantes[0].athlete?.displayName || participantes[0].athlete?.shortName;
-      if (nome && !nomes.includes(nome)) nomes.push(nome);
-    }
+  const gols = [];
+  const eventos = summary?.keyEvents || [];
+  for (const e of eventos) {
+    const tipo = e?.type?.text || '';
+    if (!/goal/i.test(tipo) || /own goal/i.test(tipo)) continue;
+    const nome = e.participants?.[0]?.athlete?.displayName;
+    const timeEspn = e.team?.displayName;
+    if (nome) gols.push({ nome, timeEspn });
   }
-  return nomes;
+  return gols;
+}
+
+function _artTokens(s) {
+  return (s || '').normalize('NFD').replace(/[̀-ͯ]/g, '')
+    .toLowerCase().replace(/[^a-z\s]/g, ' ').split(/\s+/).filter(t => t.length > 1);
+}
+
+// Converte o nome da ESPN ("Gabriel Martinelli") no nome de camisa do app ("MARTINELLI"),
+// procurando no elenco do time o jogador cujos tokens (camisa + nome completo) mais batem.
+function converterArtilheiroEspn(displayName, nossoTime) {
+  const elenco = typeof ELENCOS !== 'undefined' ? ELENCOS[nossoTime] : null;
+  if (!elenco) return displayName;
+  const alvo = _artTokens(displayName);
+  if (!alvo.length) return displayName;
+  const camisas = [...(elenco.GK || []), ...(elenco.DEF || []), ...(elenco.MID || []), ...(elenco.FWD || [])];
+  let melhor = null, melhorScore = 0;
+  for (const camisa of camisas) {
+    const nc = (typeof NOMES_COMPLETOS !== 'undefined' && NOMES_COMPLETOS[camisa]) || '';
+    const toks = new Set([..._artTokens(camisa), ..._artTokens(nc)]);
+    let score = alvo.filter(t => toks.has(t)).length;
+    if (toks.has(alvo[alvo.length - 1])) score += 1; // peso extra ao sobrenome
+    if (score > melhorScore) { melhorScore = score; melhor = camisa; }
+  }
+  return melhorScore > 0 ? melhor : displayName;
 }
 
 // Converte um evento ESPN + nosso jogo em objeto de atualização
@@ -141,7 +166,13 @@ async function espnBuildUpdate(jogo, evento) {
   if (status !== 'scheduled') {
     try {
       const det = await espnDetalhes(evento.id);
-      artilheiros = espnArtilheiros(det);
+      const gols = espnArtilheiros(det); // [{ nome, timeEspn }]
+      const vistos = new Set();
+      for (const g of gols) {
+        const nossoTime = nomeEspnParaNosso(g.timeEspn);
+        const camisa = converterArtilheiroEspn(g.nome, nossoTime);
+        if (!vistos.has(camisa)) { vistos.add(camisa); artilheiros.push(camisa); }
+      }
     } catch (_) {}
   }
 
