@@ -424,6 +424,7 @@
       renderRodadasTabs();
       iniciarCountdown();
       iniciarPolling();
+      iniciarRealtime(); // atualização instantânea de ranking e placares
       pingSyncAoVivo(); // dispara um sync inicial se houver jogo rolando
     }
 
@@ -1549,6 +1550,22 @@
         if (abaAtiva === 'ranking') carregarRanking();
         if (abaAtiva === 'chaveamento') renderChaveamento();
       }, 60 * 1000);
+    }
+
+    // Tempo real: ranking e placares atualizam na hora (sem esperar o polling)
+    function iniciarRealtime() {
+      if (!db.channel) return;
+      db.channel('bolao-' + bolaoId)
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'participantes', filter: 'bolao_id=eq.' + bolaoId }, () => {
+          carregarRanking();
+        })
+        .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'jogos' }, async () => {
+          await carregarJogos();
+          simulacao = construirSimulacao();
+          if (abaAtiva === 'jogos' && !interacaoAberta()) renderJogos();
+          if (abaAtiva === 'chaveamento') renderChaveamento();
+        })
+        .subscribe();
     }
 
     // Hidrata os ícones SVG (substitui os placeholders data-icon)
