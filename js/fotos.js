@@ -317,6 +317,7 @@ const FOTOS = {
   "ADJETEY": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ADJETEY.jpg',
   "OPOKU": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/OPOKU.jpg',
   "LUCKASSEN": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/LUCKASSEN.jpg',
+  "SENEYA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SENEYA.jpg',
   "PARTEY": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/PARTEY.jpg',
   "SIBO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SIBO.jpg',
   "SEMENYO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SEMENYO.jpg',
