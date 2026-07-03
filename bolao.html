@@ -420,12 +420,40 @@
       await carregarJogos();
       await carregarPalpites();
       await carregarRanking();
+      faseAtiva = faseCorrente(); // abre na fase que está rolando
       renderJogos();
       renderRodadasTabs();
       iniciarCountdown();
       iniciarPolling();
       iniciarRealtime(); // atualização instantânea de ranking e placares
+      iniciarAutoHideFase(); // barra de fase some ao rolar pra baixo
       pingSyncAoVivo(); // dispara um sync inicial se houver jogo rolando
+    }
+
+    // Primeira fase que ainda tem jogo não encerrado; se todas terminaram, a última com jogos
+    function faseCorrente() {
+      for (const f of FASES) {
+        const jogosF = jogos.filter(j => j.fase === f);
+        if (jogosF.length && jogosF.some(j => j.status !== 'finished')) return f;
+      }
+      const comJogos = FASES.filter(f => jogos.some(j => j.fase === f));
+      return comJogos[comJogos.length - 1] || 'round32';
+    }
+
+    // Barra de fase (Segunda Rodada, Oitavas…) some ao rolar pra baixo e volta ao
+    // rolar pra cima ou chegar no topo — como o header de apps de feed.
+    let _ultimoScrollY = 0;
+    function iniciarAutoHideFase() {
+      const barra = document.getElementById('rodadas-tabs');
+      if (!barra) return;
+      window.addEventListener('scroll', () => {
+        if (abaAtiva !== 'jogos') { barra.classList.remove('oculta'); return; }
+        const y = window.scrollY;
+        if (y < 140) barra.classList.remove('oculta');                    // topo: mostra
+        else if (y > _ultimoScrollY + 4) barra.classList.add('oculta');   // desce: esconde
+        else if (y < _ultimoScrollY - 4) barra.classList.remove('oculta');// sobe: mostra
+        _ultimoScrollY = y;
+      }, { passive: true });
     }
 
     async function carregarBolao() {
@@ -719,9 +747,22 @@
         </div>`;
     }
 
+    // Ao vivo primeiro, depois os que vão começar (próximo primeiro), depois
+    // os encerrados (mais recente primeiro).
+    function ordenarJogos(lista) {
+      const prio = j => j.status === 'live' ? 0 : j.status === 'finished' ? 2 : 1;
+      return [...lista].sort((a, b) => {
+        const pa = prio(a), pb = prio(b);
+        if (pa !== pb) return pa - pb;
+        const ta = a.data_hora ? new Date(a.data_hora).getTime() : 0;
+        const tb = b.data_hora ? new Date(b.data_hora).getTime() : 0;
+        return pa === 2 ? tb - ta : ta - tb; // encerrados: desc; ao vivo/a começar: asc
+      });
+    }
+
     function renderJogos() {
       const content = document.getElementById('jogos-content');
-      const jogosFase = jogos.filter(j => j.fase === faseAtiva);
+      const jogosFase = ordenarJogos(jogos.filter(j => j.fase === faseAtiva));
       const lider = renderLiderDestaque();
 
       if (!jogosFase.length) {
