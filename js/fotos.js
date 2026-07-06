@@ -157,6 +157,7 @@ const FOTOS = {
   "BOMBITO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/BOMBITO.jpg',
   "DAVIES": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/DAVIES.jpg',
   "LARYEA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/LARYEA.jpg',
+  "SIGUR": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SIGUR.jpg',
   "CHOINIÈRE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/CHOINIERE.jpg',
   "EUSTÁQUIO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/EUSTAQUIO.jpg',
   "KONÉ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/KONE.jpg',
