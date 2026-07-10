@@ -359,6 +359,7 @@ const FOTOS = {
   "S. GIMÉNEZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/S_GIMENEZ.jpg',
   "G. MARTÍNEZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/G_MARTINEZ.jpg',
   "BONO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/BONO.jpg',
+  "TAGNAOUTI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/TAGNAOUTI.jpg',
   "HAKIMI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/HAKIMI.jpg',
   "MAZRAOUI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MAZRAOUI.jpg',
   "RIAD": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/RIAD.jpg',
