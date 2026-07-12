@@ -468,6 +468,7 @@ const FOTOS = {
   "MUDAU": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MUDAU.jpg',
   "MAKHANYA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MAKHANYA.jpg',
   "CROSS": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/CROSS.jpg',
+  "ADAMS": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ADAMS.jpg',
   "FOSTER": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/FOSTER.jpg',
   "MOFOKENG": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MOFOKENG.jpg',
   "MASEKO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MASEKO.jpg',
