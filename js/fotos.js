@@ -225,6 +225,7 @@ const FOTOS = {
   "ĆALETA-CAR": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/CALETACAR.jpg',
   "ŠUTALO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SUTALO.jpg',
   "JAKIĆ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/JAKIC.jpg',
+  "VUŠKOVIĆ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/VUSKOVIC.jpg',
   "ERLIĆ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ERLIC.jpg',
   "MORO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MORO.jpg',
   "KOVAČIĆ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/KOVACIC.jpg',
