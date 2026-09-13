@@ -384,6 +384,7 @@ const FOTOS = {
   "SBAI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SBAI.jpg',
   "EL KAABI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/EL_KAABI.jpg',
   "VERBRUGGEN": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/VERBRUGGEN.jpg',
+  "ROEFS": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ROEFS.jpg',
   "FLEKKEN": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/FLEKKEN.jpg',
   "GEERTRUIDA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/GEERTRUIDA.jpg',
   "VIRGIL": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/VIRGIL.jpg',
