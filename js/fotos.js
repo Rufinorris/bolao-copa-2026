@@ -429,6 +429,7 @@ const FOTOS = {
   "STRAND LARSEN": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/STRAND_LARSEN.jpg',
   "NUSA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/NUSA.jpg',
   "RYERSON": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/RYERSON.jpg',
+  "O. GILL": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/O_GILL.jpg',
   "VELÁZQUEZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/VELAZQUEZ.jpg',
   "ALDERETE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ALDERETE.jpg',
   "MAURÍCIO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MAURICIO.jpg',
