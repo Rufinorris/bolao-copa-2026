@@ -341,6 +341,7 @@ const FOTOS = {
   "PRINCE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/PRINCE.jpg',
   "SUZUKI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SUZUKI.jpg',
   "OSAKO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/OSAKO.jpg',
+  "HAYAKAWA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/HAYAKAWA.jpg',
   "SUGAWARA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SUGAWARA.jpg',
   "TANIGUCHI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/TANIGUCHI.jpg',
   "ITAKURA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ITAKURA.jpg',
