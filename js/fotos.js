@@ -352,6 +352,7 @@ const FOTOS = {
   "WATANABE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/WATANABE.jpg',
   "H. ITO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/H_ITO.jpg',
   "TOMIYASU": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/TOMIYASU.jpg',
+  "J. SUZUKI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/J_SUZUKI.jpg',
   "TANAKA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/TANAKA.jpg',
   "KUBO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/KUBO.jpg',
   "DOAN": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/DOAN.jpg',
