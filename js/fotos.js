@@ -384,6 +384,7 @@ const FOTOS = {
   "OUNAHI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/OUNAHI.jpg',
   "SAIBARI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SAIBARI.jpg',
   "YASSINE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/YASSINE.jpg',
+  "EL KHANNOUSS": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/EL_KHANNOUSS.jpg',
   "EL AYNAOUI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/EL_AYNAOUI.jpg',
   "RAHIMI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/RAHIMI.jpg',
   "SBAI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/SBAI.jpg',
