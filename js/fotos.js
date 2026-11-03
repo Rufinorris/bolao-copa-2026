@@ -8,6 +8,7 @@ const FOTOS = {
   "HADJAM": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/HADJAM.jpg',
   "CHERGUI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/CHERGUI.jpg',
   "ZERROUKI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ZERROUKI.jpg',
+  "AOUAR": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/AOUAR.jpg',
   "BOUDAOUI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/BOUDAOUI.jpg',
   "BENTALEB": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/BENTALEB.jpg',
   "MAZA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MAZA.jpg',
