@@ -368,6 +368,7 @@ const FOTOS = {
   "AYASE": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/AYASE.jpg',
   "E. ÁLVAREZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/E_ALVAREZ.jpg',
   "FIDALGO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/FIDALGO.jpg',
+  "G. MORA": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/G_MORA.jpg',
   "B. GUTIÉRREZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/B_GUTIERREZ.jpg',
   "S. GIMÉNEZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/S_GIMENEZ.jpg',
   "G. MARTÍNEZ": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/G_MARTINEZ.jpg',
