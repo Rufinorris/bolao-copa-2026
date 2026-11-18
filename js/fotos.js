@@ -534,6 +534,7 @@ const FOTOS = {
   "GYÖKERES": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/GYOKERES.jpg',
   "ALI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ALI.jpg',
   "KOBEL": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/KOBEL.jpg',
+  "MVOGO": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MVOGO.jpg',
   "MUHEIM": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/MUHEIM.jpg',
   "WIDMER": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/WIDMER.jpg',
   "ELVEDI": 'https://cdn.jsdelivr.net/gh/Rufinorris/bolao-copa-2026@master/fotos/ELVEDI.jpg',
